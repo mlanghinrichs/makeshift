@@ -1,3 +1,4 @@
+/// Return the full week's schedule for Labyrinth.
 pub fn get_schedule() -> Schedule {
     let mut sched = Schedule::new();
     sched.set_hours(Day::Saturday, 9, 21);
@@ -78,7 +79,13 @@ struct Shift {
     end: usize,
 }
 
+/// A week's schedule.
+///
+/// `events` holds a Vec<> of all events and classes within the week.
+/// `raw_reqs` holds an array of arrays of quarter-hourly staffing requirements for each weekday.
+/// `shifts` is an array of Vec<>s of currently-scheduled shifts.
 pub struct Schedule {
+    events: Vec<Event>,
     raw_reqs: [[i32; 24 * 4]; 7],
     shifts: [Vec<Shift>; 7]
 }
@@ -107,13 +114,18 @@ impl Shift {
 impl Schedule {
     fn new() -> Schedule {
         Schedule {
+            events: Vec::new(),
             raw_reqs: [[0; 24*4]; 7],
             shifts: [Vec::new(), Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new()],
         }
     }
-    // pub fn assign_events() -> {
+    // fn assign_classes(&mut self) -> () {
+    //     for event in self.events.iter() {
     //
+    //     }
     // }
+
+    /// Print the quarter-hourly staffing requirements for all time during which the store is open.
     pub fn print_reqs(&self) -> () {
         for (i, day) in self.raw_reqs.iter().enumerate() {
             let day_name = match index_to_day(i) {
@@ -128,6 +140,7 @@ impl Schedule {
             }
         }
     }
+    /// Print all currently-assigned shifts for the week.
     pub fn print_shifts(&self) -> () {
         for (i, day) in self.shifts.iter().enumerate() {
             let day_name = index_to_day(i).unwrap().to_string();

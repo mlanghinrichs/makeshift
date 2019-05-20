@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 #[allow(unused_mut)]
-/// Return the full employee roster.
+/// Return the full employee roster for Labyrinth Games & Puzzles.
 pub fn get_roster() -> Roster {
     let mut ros = Roster::new();
     // Alex
@@ -84,12 +84,14 @@ pub fn get_roster() -> Roster {
 }
 
 /// The full roster of working employees of the store.
+///
+/// `self.emps` contains the raw HashMap of ID Strings -> Employees.
 pub struct Roster {
     emps: HashMap<String, Employee>,
 }
 
 #[derive(Clone)]
-/// An employee of the business.
+/// An employee of the business, identified by the String `self.id`.
 pub struct Employee {
     pub id: String,
     reqs: Requirements,
@@ -122,10 +124,11 @@ impl Roster {
     fn add(&mut self, emp: Employee) {
         self.emps.insert(emp.get_id(), emp);
     }
-    /// Get an employee from the roster by String ID.
+    /// Get an employee reference from the roster by String ID.
     pub fn get(&self, id: String) -> &Employee {
         self.emps.get(&id).unwrap()
     }
+    /// Return an iterator across the employees in this roster.
     pub fn iter(&self) -> std::collections::hash_map::Iter<String, Employee> {
         self.emps.iter()
     }
@@ -156,10 +159,9 @@ impl Employee {
     fn can_do_kids_magic(&mut self) {
         self.abils.kids_magic = true;
     }
-    /// Print info about an employee's abilities and availability.
+    /// `print!()` info about an employee's abilities and availability.
     pub fn print(&self) {
-        println!();
-        println!("=== ID: {} ===", self.get_id());
+        println!("\n=== ID: {} ===", self.get_id());
         self.reqs.print();
         self.abils.print();
     }
