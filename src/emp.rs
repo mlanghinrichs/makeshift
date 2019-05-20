@@ -141,7 +141,8 @@ impl Employee {
         let abils = Abilities::new();
         Employee { id, reqs, abils }
     }
-    fn get_id(&self) -> String {
+    /// Return Employee's identifier.
+    pub fn get_id(&self) -> String {
         self.id.clone()
     }
     fn can_do_pkmn(&mut self) {

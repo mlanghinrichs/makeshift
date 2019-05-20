@@ -1,3 +1,7 @@
+use super::*;
+
+// ========== PUBLIC FUNCTIONS ============
+
 /// Return the full week's schedule for Labyrinth.
 pub fn get_schedule() -> Schedule {
     let mut sched = Schedule::new();
@@ -7,8 +11,11 @@ pub fn get_schedule() -> Schedule {
     sched.set_hours(Day::Wednesday, 10, 21);
     sched.set_hours(Day::Thursday, 10, 22);
     sched.set_hours(Day::Friday, 10, 22);
+
     sched
 }
+
+// ========== UTILITY FUNCTIONS ============
 
 fn time_to_index(time: usize) -> usize {
     if time % 15 != 0 {
@@ -46,6 +53,8 @@ fn index_to_day(index: usize) -> Option<Day> {
     }
 }
 
+// ========== DATA TYPES ============
+
 enum EventType {
     Pkmn,
     Magic,
@@ -74,9 +83,13 @@ struct Event {
 
 struct Shift {
     emp_id: String,
-    day: usize,
     start: usize,
     end: usize,
+}
+
+pub struct Time {
+    pub string: String,
+    pub qi: usize,
 }
 
 /// A week's schedule.
@@ -89,6 +102,8 @@ pub struct Schedule {
     raw_reqs: [[i32; 24 * 4]; 7],
     shifts: [Vec<Shift>; 7]
 }
+
+// ========== METHODS & ASSOCIATED FUNCTIONS ============
 
 impl Day {
     fn to_string(&self) -> String {
@@ -111,6 +126,39 @@ impl Shift {
     }
 }
 
+impl Time {
+    // Constructors
+    pub fn from_str(st: &str) -> Time {
+        let string = String::from(st);
+        let qi = Time::string_to_qi(st);
+        if qi >= 4*24 {
+            panic!("Bad time!")
+        }
+        Time { string, qi }
+    }
+    pub fn from_qi(qi: usize) -> Time {
+        if qi >= 4*24 {
+            panic!("Bad time!")
+        }
+        Time {
+            string: Time::qi_to_string(qi),
+            qi
+        }
+    }
+    // Conversion Utilities
+    fn string_to_qi(s: &str) -> usize {
+        let v: Vec<&str> = s.split(":").collect();
+        let hours: usize = v[0].parse().unwrap();
+        let minutes: usize = v[0].parse().unwrap();
+        ((hours*60) + minutes) / 15
+    }
+    fn qi_to_string(s: usize) -> String {
+        let hours = s / 4;
+        let minutes = s % 4;
+        format!("{}:{:0>2}", hours*15, minutes*15)
+    }
+}
+
 impl Schedule {
     fn new() -> Schedule {
         Schedule {
@@ -119,12 +167,6 @@ impl Schedule {
             shifts: [Vec::new(), Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new()],
         }
     }
-    // fn assign_classes(&mut self) -> () {
-    //     for event in self.events.iter() {
-    //
-    //     }
-    // }
-
     /// Print the quarter-hourly staffing requirements for all time during which the store is open.
     pub fn print_reqs(&self) -> () {
         for (i, day) in self.raw_reqs.iter().enumerate() {
@@ -150,15 +192,10 @@ impl Schedule {
             }
         }
     }
-    /// Set the store's open hours for a given day.
-    ///
-    /// 'start_hour' and 'end_hour' are 24-hour hour numbers.
-    ///
-    /// # Examples
-    /// '''
-    /// let s = Schedule::new();
-    /// s.set_hours(Day::Monday, 12, 19);
-    /// '''
+    pub fn assign_shift(&mut self, emp_id: String,  day_index: usize, start: usize, end: usize) {
+        let sh = Shift { emp_id, start, end };
+        self.shifts[day_index].push(sh);
+    }
     fn set_hours(&mut self, day: Day, start_hour: usize, end_hour: usize) -> () {
         let day_index = day_to_index(day);
         let start = time_to_index(start_hour*60);
