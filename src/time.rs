@@ -132,10 +132,10 @@ impl Time {
         //! ```
         //! use sched_lib::time::Time as Time;
         //! let t = Time::from_str("10:30");
-        //! println!("{}", t.get_qi()); // 42
+        //! assert_eq!(t.get_qi(), 42);
         //! 
         //! let u = Time::from_str("22:45");
-        //! println!("{}", t.get_qi()); // 91
+        //! assert_eq!(u.get_qi(), 91);
         //! ```
         let qi = Time::string_to_qi(st);
         let string = Time::qi_to_string(qi);
@@ -151,10 +151,10 @@ impl Time {
         //! ```
         //! use sched_lib::time::Time as Time;
         //! let t = Time::from_qi(0);
-        //! println!("{}", t.to_string_24h()); // 0:00
+        //! assert_eq!(t.to_string_24h(), "0:00");
         //! 
         //! let u = Time::from_qi(49);
-        //! println!("{}", t.to_string_24h()); // 12:15
+        //! assert_eq!(u.to_string_24h(), "12:15"); // 12:15
         //! ```
         if qi >= 4*24 {
             panic!("Bad time!")
@@ -171,8 +171,8 @@ impl Time {
         //! ```
         //! use sched_lib::time::Time as Time;
         //! let t = Time::from_hour(14);
-        //! println!("{}", t.get_qi()); // 52
-        //! println!("{}", t.to_string_24h()); // 14:00
+        //! assert_eq!(t.get_qi(), 56);
+        //! assert_eq!(t.to_string_24h(), "14:00");
         //! ```
         Time::from_qi(hour * 4)
     }
@@ -180,7 +180,7 @@ impl Time {
     fn string_to_qi(s: &str) -> usize {
         let v: Vec<&str> = s.split(":").collect();
         let hours: usize = v[0].parse().unwrap();
-        let minutes: usize = v[0].parse().unwrap();
+        let minutes: usize = v[1].parse().unwrap();
         ((hours*60) + minutes) / 15
     }
     fn qi_to_string(qi: usize) -> String {
@@ -221,7 +221,7 @@ impl Time {
             format!("12:{:0>2}p", (qi%4)*15)
         } else {
             // 1:MMp -> 11:MMp
-            format!("{}:{:0>2}", (qi/4)-12, (qi%4)*15)
+            format!("{}:{:0>2}p", (qi/4)-12, (qi%4)*15)
         }
     }
     pub fn get_qi(&self) -> usize {
