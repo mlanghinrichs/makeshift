@@ -29,18 +29,6 @@ fn index_to_time(index: usize) -> String {
     format!("{}:{:0>2}", index/4, (index%4)*15)
 }
 
-fn day_to_index(day: Day) -> usize {
-    match day {
-        Day::Saturday => 0,
-        Day::Sunday => 1,
-        Day::Monday => 2,
-        Day::Tuesday => 3,
-        Day::Wednesday => 4,
-        Day::Thursday => 5,
-        Day::Friday => 6,
-    }
-}
-
 fn index_to_day(index: usize) -> Option<Day> {
     match index {
         0 => Some(Day::Saturday),
@@ -65,7 +53,7 @@ enum EventType {
 }
 
 #[derive(Debug)]
-enum Day {
+pub enum Day {
     Saturday,
     Sunday,
     Monday,
@@ -77,15 +65,15 @@ enum Day {
 
 struct Event {
     required_emp_ids: Vec<String>,
-    start: usize,
-    end: usize,
+    start: Time,
+    end: Time,
     kind: EventType,
 }
 
 struct Shift {
     emp_id: String,
-    start: usize,
-    end: usize,
+    start: Time,
+    end: Time,
 }
 
 #[derive(Debug)]
@@ -119,6 +107,18 @@ impl Day {
             Day::Friday => "Friday",
         };
         day_name.to_string()
+    }
+    fn to_index(&self) -> usize {
+        let index = match self {
+            Day::Saturday => 0,
+            Day::Sunday => 1,
+            Day::Monday => 2,
+            Day::Tuesday => 3,
+            Day::Wednesday => 4,
+            Day::Thursday => 5,
+            Day::Friday => 6,
+        };
+        index
     }
 }
 
@@ -202,22 +202,21 @@ impl Schedule {
             }
         }
     }
-    pub fn assign_shift(&mut self, emp_id: String,  day_index: usize, start: usize, end: usize) {
+    pub fn assign_shift(&mut self, emp_id: String,  day: Day, start: Time, end: Time) {
         let sh = Shift { emp_id, start, end };
-        self.shifts[day_index].push(sh);
+        self.shifts[day.to_index()].push(sh);
     }
-    fn set_hours(&mut self, day: Day, start_hour: usize, end_hour: usize) -> () {
-        let day_index = day_to_index(day);
-        let start = time_to_index(start_hour*60);
-        let end = time_to_index(end_hour*60);
+    fn set_hours(&mut self, day: Day, start: usize, end: usize) -> () {
+        let start = Time::from_hour(start).qi;
+        let end = Time::from_hour(end).qi;
         for qi in start-3..start {
-            self.raw_reqs[day_index][qi] = 3;
+            self.raw_reqs[day.to_index()][qi] = 3;
         }
         for qi in start..=end {
-            self.raw_reqs[day_index][qi] = 4;
+            self.raw_reqs[day.to_index()][qi] = 4;
         }
         for qi in end+1..=end+3 {
-            self.raw_reqs[day_index][qi] = 3;
+            self.raw_reqs[day.to_index()][qi] = 3;
         }
     }
 }

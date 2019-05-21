@@ -5,7 +5,7 @@ pub use time::*;
 
 pub fn schedule_employees(mut sched: Schedule, ros: Roster) -> Schedule {
     for (id, _empl) in ros.iter() {
-        sched.assign_shift(id.clone(), 0, 9*60, 10*60);
+        sched.assign_shift(id.clone(), Day::Saturday, Time::from_hour(9), Time::from_hour(10));
     }
 
     sched
