@@ -1,3 +1,4 @@
+#[allow(dead_code, unused_imports)]
 use super::*;
 
 // ========== PUBLIC FUNCTIONS ============
@@ -87,6 +88,7 @@ struct Shift {
     end: usize,
 }
 
+#[derive(Debug)]
 pub struct Time {
     pub string: String,
     pub qi: usize,
@@ -129,8 +131,8 @@ impl Shift {
 impl Time {
     // Constructors
     pub fn from_str(st: &str) -> Time {
-        let string = String::from(st);
         let qi = Time::string_to_qi(st);
+        let string = Time::qi_to_string(qi);
         if qi >= 4*24 {
             panic!("Bad time!")
         }
@@ -145,6 +147,9 @@ impl Time {
             qi
         }
     }
+    pub fn from_hour(hour: usize) -> Time {
+        Time::from_qi(hour * 4)
+    }
     // Conversion Utilities
     fn string_to_qi(s: &str) -> usize {
         let v: Vec<&str> = s.split(":").collect();
@@ -152,10 +157,15 @@ impl Time {
         let minutes: usize = v[0].parse().unwrap();
         ((hours*60) + minutes) / 15
     }
-    fn qi_to_string(s: usize) -> String {
-        let hours = s / 4;
-        let minutes = s % 4;
+    fn qi_to_string(qi: usize) -> String {
+        let hours = qi / 4;
+        let minutes = qi % 4;
         format!("{}:{:0>2}", hours*15, minutes*15)
+    }
+}
+impl PartialEq for Time {
+    fn eq(&self, other: &Self) -> bool {
+        self.string == other.string && self.qi == other.qi
     }
 }
 

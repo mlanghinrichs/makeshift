@@ -34,4 +34,16 @@ mod test_time {
     fn bad_qi() {
         Time::from_qi(100);
     }
+    #[test]
+    fn eq1() {
+        let a = Time::from_str("09:00");
+        let b = Time::from_str("9:0");
+        assert_eq!(a, b)
+    }
+    #[test]
+    fn eq2() {
+        let a = Time::from_str("09:00");
+        let b = Time::from_hour(9);
+        assert_eq!(a, b)
+    }
 }
