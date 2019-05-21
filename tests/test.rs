@@ -1,5 +1,3 @@
-use sched_lib;
-
 #[cfg(test)]
 #[allow(unused_imports)]
 mod test_time {
@@ -7,12 +5,12 @@ mod test_time {
     #[test]
     fn morning() {
         let t = Time::from_str("10:15");
-        assert_eq!(t.qi, 40);
+        assert_eq!(t.get_qi(), 40);
     }
     #[test]
     fn afternoon() {
         let t = Time::from_str("22:30");
-        assert_eq!(t.qi, 89);
+        assert_eq!(t.get_qi(), 89);
     }
     #[test]
     #[should_panic]
@@ -45,5 +43,9 @@ mod test_time {
         let a = Time::from_str("09:00");
         let b = Time::from_hour(9);
         assert_eq!(a, b)
+    }
+    #[test]
+    fn string_test() {
+        assert_eq!(Time::from_hour(9).to_string_24h(), "9:00".to_string())
     }
 }

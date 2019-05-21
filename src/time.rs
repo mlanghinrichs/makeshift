@@ -18,13 +18,6 @@ pub fn get_schedule() -> Schedule {
 
 // ========== UTILITY FUNCTIONS ============
 
-fn time_to_index(time: usize) -> usize {
-    if time % 15 != 0 {
-        panic!("bad time passed to time_to_index! ({})", time);
-    }
-    usize::from(time / 15)
-}
-
 fn index_to_time(index: usize) -> String {
     format!("{}:{:0>2}", index/4, (index%4)*15)
 }
@@ -52,6 +45,7 @@ enum EventType {
     KidsMagic,
 }
 
+/// The days of the week. They implement conversion to index and string to enable internal functionality.
 #[derive(Debug)]
 pub enum Day {
     Saturday,
@@ -76,10 +70,11 @@ struct Shift {
     end: Time,
 }
 
+/// A time of day, with internal string and QuarterIndex (`qi`) representation.
 #[derive(Debug)]
 pub struct Time {
-    pub string: String,
-    pub qi: usize,
+    string: String,
+    qi: usize,
 }
 
 /// A week's schedule.
@@ -124,13 +119,24 @@ impl Day {
 
 impl Shift {
     fn to_string(&self) -> String {
-        "temp".to_string()
+        format!("{} => {} - {}", self.emp_id, self.start.string, self.end.string)
     }
 }
 
 impl Time {
     // Constructors
     pub fn from_str(st: &str) -> Time {
+        //! Construct a Time from a &str of the format `"HH:MM"` or `"H:MM"`, using 24-hour notation.
+        //! 
+        //! # Examples
+        //! ```
+        //! use sched_lib::time::Time as Time;
+        //! let t = Time::from_str("10:30");
+        //! println!("{}", t.get_qi()); // 42
+        //! 
+        //! let u = Time::from_str("22:45");
+        //! println!("{}", t.get_qi()); // 91
+        //! ```
         let qi = Time::string_to_qi(st);
         let string = Time::qi_to_string(qi);
         if qi >= 4*24 {
@@ -139,6 +145,17 @@ impl Time {
         Time { string, qi }
     }
     pub fn from_qi(qi: usize) -> Time {
+        //! Construct a Time from a QuarterIndex (the 0-indexed position of its 15-minute chunk in the day).
+        //! 
+        //! # Examples
+        //! ```
+        //! use sched_lib::time::Time as Time;
+        //! let t = Time::from_qi(0);
+        //! println!("{}", t.to_string_24h()); // 0:00
+        //! 
+        //! let u = Time::from_qi(49);
+        //! println!("{}", t.to_string_24h()); // 12:15
+        //! ```
         if qi >= 4*24 {
             panic!("Bad time!")
         }
@@ -148,6 +165,15 @@ impl Time {
         }
     }
     pub fn from_hour(hour: usize) -> Time {
+        //! Construct a Time from a simple hour number out of 24. Implemented as from_qi(hour * 4).
+        //! 
+        //! # Examples
+        //! ```
+        //! use sched_lib::time::Time as Time;
+        //! let t = Time::from_hour(14);
+        //! println!("{}", t.get_qi()); // 52
+        //! println!("{}", t.to_string_24h()); // 14:00
+        //! ```
         Time::from_qi(hour * 4)
     }
     // Conversion Utilities
@@ -160,7 +186,47 @@ impl Time {
     fn qi_to_string(qi: usize) -> String {
         let hours = qi / 4;
         let minutes = qi % 4;
-        format!("{}:{:0>2}", hours*15, minutes*15)
+        format!("{}:{:0>2}", hours, minutes*15)
+    }
+    // Access
+    pub fn to_string_24h(&self) -> String {
+        //! Return a 24-hour (military) string of this time.
+        //! 
+        //! # Examples
+        //! ```
+        //! use sched_lib::time::Time as Time;
+        //! println!("{}", Time::from_hour(13).to_string_24h()); // "13:00"
+        //! println!("{}", Time::from_hour(2).to_string_24h()); // "2:00"
+        //! ```
+        self.string.clone()
+    }
+    pub fn to_string_12h(&self) -> String {
+        //! Return a 12-hour (US) string of this time.
+        //! 
+        //! # Examples
+        //! ```
+        //! use sched_lib::time::Time as Time;
+        //! println!("{}", Time::from_hour(23).to_string_12h()); // "11:00p"
+        //! println!("{}", Time::from_hour(9).to_string_12h()); // "9:00a"
+        //! ```
+        let qi = self.qi;
+        if qi < 4 {
+            // 12:MMa
+            format!("12:{:0>2}a", qi*15)
+        } else if qi >= 4 && qi < 12*4 {
+            // 1:MMa -> 11:MMa
+            format!("{}:{:0>2}a", qi/4, (qi%4)*15)
+        } else if qi >= 12*4 && qi < 13*4 {
+            // 12:MMp
+            format!("12:{:0>2}p", (qi%4)*15)
+        } else {
+            // 1:MMp -> 11:MMp
+            format!("{}:{:0>2}", (qi/4)-12, (qi%4)*15)
+        }
+    }
+    pub fn get_qi(&self) -> usize {
+        //! Access a time's QuarterIndex (see from_qi for examples of qi).
+        self.qi
     }
 }
 impl PartialEq for Time {
