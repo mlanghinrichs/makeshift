@@ -1,88 +1,5 @@
 use std::collections::HashMap;
 
-#[allow(unused_mut)]
-/// Return the full employee roster for Labyrinth Games & Puzzles.
-pub fn get_roster() -> Roster {
-    let mut ros = Roster::new();
-    // Alex
-    let mut alex = Employee::new("Alex".to_string());
-    alex.can_do_magic();
-    alex.can_do_kids_magic();
-    ros.add(alex);
-    // Arsenio
-    let mut arsenio = Employee::new("Arsenio".to_string());
-    arsenio.can_do_pkmn();
-    arsenio.cant_work(0);
-    ros.add(arsenio);
-    // Ben
-    let mut ben = Employee::new("Ben".to_string());
-    ben.can_do_magic();
-    ben.can_do_kids_magic();
-    ros.add(ben);
-    // Camilla
-    let mut camilla = Employee::new("Camilla".to_string());
-    ros.add(camilla);
-    // Darryl
-    let mut darryl = Employee::new("Darryl".to_string());
-    ros.add(darryl);
-    // Dzhoy
-    let mut dzhoy = Employee::new("Dzhoy".to_string());
-    ros.add(dzhoy);
-    // Evan
-    let mut evan = Employee::new("Evan".to_string());
-    evan.cant_do_class();
-    evan.can_only_close();
-    ros.add(evan);
-    // Hannah
-    let mut hannah = Employee::new("Hannah".to_string());
-    hannah.cant_work(0);
-    hannah.cant_work(1);
-    hannah.cant_work(2);
-    hannah.cant_work(4);
-    hannah.cant_work(6);
-    ros.add(hannah);
-    // Heather
-    let mut heather = Employee::new("Heather".to_string());
-    heather.is_class_only();
-    ros.add(heather);
-    // Joe
-    let mut joe = Employee::new("Joe".to_string());
-    joe.can_do_kids_magic();
-    ros.add(joe);
-    // Justin
-    let mut justin = Employee::new("Justin".to_string());
-    justin.is_class_only();
-    ros.add(justin);
-    // Kathleen
-    //
-    // Doesn't really need to be scheduled for shifts
-    //
-    // Mariah
-    let mut mariah = Employee::new("Mariah".to_string());
-    mariah.is_class_only();
-    ros.add(mariah);
-    // Matt
-    let mut matt = Employee::new("Matt".to_string());
-    matt.can_do_magic();
-    matt.can_do_kids_magic();
-    ros.add(matt);
-    // Nick
-    let mut nick = Employee::new("Nick".to_string());
-    ros.add(nick);
-    // Rich
-    let mut rich = Employee::new("Rich".to_string());
-    ros.add(rich);
-    // William
-    // Yoni
-    let mut yoni = Employee::new("Yoni".to_string());
-    ros.add(yoni);
-    // Zach
-    let mut zach = Employee::new("Zach".to_string());
-    ros.add(zach);
-
-    return ros;
-}
-
 /// The full roster of working employees of the store.
 ///
 /// `self.emps` contains the raw HashMap of ID Strings -> Employees.
@@ -117,11 +34,13 @@ struct Abilities {
 }
 
 impl Roster {
-    fn new() -> Roster {
+    pub fn new() -> Roster {
+        //! Create a new employee roster.
         let emps = HashMap::new();
         Roster { emps }
     }
-    fn add(&mut self, emp: Employee) {
+    pub fn add(&mut self, emp: Employee) {
+        //! Add an employee to the roster.
         self.emps.insert(emp.get_id(), emp);
     }
     /// Get an employee reference from the roster by String ID.
@@ -136,28 +55,29 @@ impl Roster {
 
 #[allow(dead_code)]
 impl Employee {
-    fn new(id: String) -> Employee {
+    pub fn new(id: String) -> Employee {
+        //! Create a new Employee.
         let reqs = Requirements::new();
         let abils = Abilities::new();
         Employee { id, reqs, abils }
     }
-    /// Return Employee's identifier.
     pub fn get_id(&self) -> String {
+        //! Return an Employee's identifier.
         self.id.clone()
     }
-    fn can_do_pkmn(&mut self) {
+    pub fn can_do_pkmn(&mut self) {
         self.abils.pkmn = true;
     }
-    fn can_do_magic(&mut self) {
+    pub fn can_do_magic(&mut self) {
         self.abils.magic = true;
     }
-    fn cant_do_class(&mut self) {
+    pub fn cant_do_class(&mut self) {
         self.abils.class = false;
     }
-    fn cant_do_adult_parties(&mut self) {
+    pub fn cant_do_adult_parties(&mut self) {
         self.abils.adult_parties = false;
     }
-    fn can_do_kids_magic(&mut self) {
+    pub fn can_do_kids_magic(&mut self) {
         self.abils.kids_magic = true;
     }
     /// `print!()` info about an employee's abilities and availability.
@@ -166,10 +86,11 @@ impl Employee {
         self.reqs.print();
         self.abils.print();
     }
-    fn can_only_close(&mut self) {
+    pub fn can_only_close(&mut self) {
         self.reqs.closer_only = true;
     }
-    fn change_hours(&mut self, min: i32, max: i32) -> Result<(), &'static str> {
+    pub fn change_hours(&mut self, min: i32, max: i32) -> Result<(), &'static str> {
+        //! Change an employee's required hour max/min.
         if max > min && min >= 0 && max <= 40 {
             self.reqs.minimum_hours = min;
             self.reqs.maximum_hours = max;
@@ -179,12 +100,12 @@ impl Employee {
             Err("something went wrong!")
         }
     }
-    fn is_class_only(&mut self) {
+    pub fn is_class_only(&mut self) {
         self.reqs.class_only = true;
         self.change_hours(0, 10).expect("something went wrong in setting hours somehow");
         self.cant_do_adult_parties();
     }
-    fn cant_work(&mut self, day: usize) -> () {
+    pub fn cant_work(&mut self, day: usize) -> () {
         if day < 7 {
             self.reqs.can_work_days[day] = false;
         } else {

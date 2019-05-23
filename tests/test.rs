@@ -74,3 +74,23 @@ mod test_time {
         assert_eq!(Time::from_str("22:45").to_string_12h(), "10:45p".to_string());
     }
 }
+
+#[cfg(test)]
+mod test_time_event {
+    use sched_lib::time::{ Event, Day, Time, EventType };
+    fn setup() -> Event {
+        let mut ev = Event::new(Day::Saturday, Time::from_hour(12), Time::from_hour(17), EventType::Magic);
+        ev.add_employee("Matt".to_string());
+        ev
+    }
+    #[test]
+    fn req_ids() {
+        let ev = setup();
+        assert_eq!(vec!["Matt".to_string()], *ev.req_ids())
+    }
+    #[test]
+    fn has_reqs() {
+        let ev = setup();
+        assert!(ev.has_reqs())
+    }
+}

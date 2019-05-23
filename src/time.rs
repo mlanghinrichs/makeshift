@@ -1,21 +1,6 @@
 //! The time module contains generic scheduling and shift information.
 
-// ========== PUBLIC FUNCTIONS ============
-
-/// Return the full week's schedule for Labyrinth.
-pub fn get_schedule() -> Schedule {
-    let mut sched = Schedule::new();
-    sched.set_hours(Day::Saturday, 9, 21);
-    sched.set_hours(Day::Sunday, 10, 18);
-    sched.set_hours(Day::Tuesday, 10, 22);
-    sched.set_hours(Day::Wednesday, 10, 21);
-    sched.set_hours(Day::Thursday, 10, 22);
-    sched.set_hours(Day::Friday, 10, 22);
-
-    sched
-}
-
-// ========== UTILITY FUNCTIONS ============
+// ========== INTERNAL UTILITY FUNCTIONS ============
 
 fn index_to_time(index: usize) -> String {
     format!("{}:{:0>2}", index/4, (index%4)*15)
@@ -36,7 +21,8 @@ fn index_to_day(index: usize) -> Option<Day> {
 
 // ========== DATA TYPES ============
 
-enum EventType {
+#[derive(Clone)]
+pub enum EventType {
     Pkmn,
     Magic,
     Class,
@@ -45,7 +31,7 @@ enum EventType {
 }
 
 /// The days of the week. They implement conversion to index and string to enable internal functionality.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Day {
     Saturday,
     Sunday,
@@ -56,8 +42,10 @@ pub enum Day {
     Friday
 }
 
-struct Event {
+#[derive(Clone)]
+pub struct Event {
     required_emp_ids: Vec<String>,
+    day: Day,
     start: Time,
     end: Time,
     kind: EventType,
@@ -70,7 +58,7 @@ struct Shift {
 }
 
 /// A time of day, with internal string and QuarterIndex (`qi`) representation.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Time {
     string: String,
     qi: usize,
@@ -114,6 +102,33 @@ impl Day {
         };
         index
     }
+}
+
+impl Event {
+    // Constructor
+    pub fn new(day: Day, start: Time, end: Time, kind: EventType) -> Event {
+        //! Creates a new event with empty employee requirements.
+        Event { required_emp_ids: Vec::new(), day, start, end, kind }
+    }
+    // Modification
+    pub fn add_employee(&mut self, emp_id: String) {
+        //! Add an employee who is required to work this event/class.
+        self.required_emp_ids.push(emp_id);
+    }
+    pub fn add_employees(&mut self, emp_ids: Vec<String>) {
+        //! Add a group of employees who are required to work this event/class.
+        self.required_emp_ids.extend(emp_ids);
+    }
+    // Access
+    pub fn req_ids(&self) -> &Vec<String> {
+        //! Return IDs of all employees required to work this event.
+        &self.required_emp_ids
+    }
+    pub fn has_reqs(&self) -> bool {
+        //! Check if this event has employee requirements.
+        !self.required_emp_ids.is_empty()
+    }
+
 }
 
 impl Shift {
@@ -175,18 +190,6 @@ impl Time {
         //! ```
         Time::from_qi(hour * 4)
     }
-    // Conversion Utilities
-    fn string_to_qi(s: &str) -> usize {
-        let v: Vec<&str> = s.split(":").collect();
-        let hours: usize = v[0].parse().unwrap();
-        let minutes: usize = v[1].parse().unwrap();
-        ((hours*60) + minutes) / 15
-    }
-    fn qi_to_string(qi: usize) -> String {
-        let hours = qi / 4;
-        let minutes = qi % 4;
-        format!("{}:{:0>2}", hours, minutes*15)
-    }
     // Access
     pub fn to_string_24h(&self) -> String {
         //! Return a 24-hour (military) string of this time.
@@ -227,6 +230,18 @@ impl Time {
         //! Access a time's QuarterIndex (see from_qi for examples of qi).
         self.qi
     }
+    // Conversion Utilities
+    fn string_to_qi(s: &str) -> usize {
+        let v: Vec<&str> = s.split(":").collect();
+        let hours: usize = v[0].parse().unwrap();
+        let minutes: usize = v[1].parse().unwrap();
+        ((hours*60) + minutes) / 15
+    }
+    fn qi_to_string(qi: usize) -> String {
+        let hours = qi / 4;
+        let minutes = qi % 4;
+        format!("{}:{:0>2}", hours, minutes*15)
+    }
 }
 impl PartialEq for Time {
     fn eq(&self, other: &Self) -> bool {
@@ -235,13 +250,15 @@ impl PartialEq for Time {
 }
 
 impl Schedule {
-    fn new() -> Schedule {
+    // Constructor
+    pub fn new() -> Schedule {
         Schedule {
             events: Vec::new(),
             raw_reqs: [[0; 24*4]; 7],
             shifts: [Vec::new(), Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new()],
         }
     }
+    // Display/Access
     pub fn print_reqs(&self) -> () {
         //! Print the quarter-hourly staffing requirements for all time during which the store is open.
         for (i, day) in self.raw_reqs.iter().enumerate() {
@@ -267,12 +284,27 @@ impl Schedule {
             }
         }
     }
+    pub fn get_events(&self) -> &Vec<Event> {
+        &self.events
+    }
+    // Modification
+    pub fn add_event(&mut self, kind: EventType, day: Day, start: Time, end: Time) -> &mut Event {
+        let ev = Event::new(day, start, end, kind);
+        self.events.push(ev);
+        let li = self.events.len() - 1;
+        &mut self.events[li]
+    }
     pub fn assign_shift(&mut self, emp_id: String,  day: Day, start: Time, end: Time) {
         //! Assign a new shift to the employee with id emp_id.
         let sh = Shift { emp_id, start, end };
         self.shifts[day.to_index()].push(sh);
     }
-    fn set_hours(&mut self, day: Day, start: usize, end: usize) -> () {
+    pub fn assign_event(&mut self, emp_id: String,  event: Event) {
+        //! Assign an event to the employee with id emp_id.
+        let sh = Shift { emp_id, start: event.start.clone(), end: event.end.clone() };
+        self.shifts[event.day.to_index()].push(sh);
+    }
+    pub fn set_hours(&mut self, day: Day, start: usize, end: usize) -> () {
         let start = Time::from_hour(start).qi;
         let end = Time::from_hour(end).qi;
         for qi in start-3..start {
