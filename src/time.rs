@@ -1,5 +1,4 @@
-#[allow(dead_code, unused_imports)]
-use super::*;
+//! The time module contains generic scheduling and shift information.
 
 // ========== PUBLIC FUNCTIONS ============
 
@@ -243,8 +242,8 @@ impl Schedule {
             shifts: [Vec::new(), Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new()],
         }
     }
-    /// Print the quarter-hourly staffing requirements for all time during which the store is open.
     pub fn print_reqs(&self) -> () {
+        //! Print the quarter-hourly staffing requirements for all time during which the store is open.
         for (i, day) in self.raw_reqs.iter().enumerate() {
             let day_name = match index_to_day(i) {
                 Some(d) => d.to_string(),
@@ -258,8 +257,8 @@ impl Schedule {
             }
         }
     }
-    /// Print all currently-assigned shifts for the week.
     pub fn print_shifts(&self) -> () {
+        //! Print all currently-assigned shifts for the week.
         for (i, day) in self.shifts.iter().enumerate() {
             let day_name = index_to_day(i).unwrap().to_string();
             println!("\n{}\n=========", day_name);
@@ -269,6 +268,7 @@ impl Schedule {
         }
     }
     pub fn assign_shift(&mut self, emp_id: String,  day: Day, start: Time, end: Time) {
+        //! Assign a new shift to the employee with id emp_id.
         let sh = Shift { emp_id, start, end };
         self.shifts[day.to_index()].push(sh);
     }
