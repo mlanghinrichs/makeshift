@@ -1,5 +1,7 @@
 //! The time module contains generic scheduling and shift information.
 
+use std::fmt;
+
 // ========== INTERNAL UTILITY FUNCTIONS ============
 
 fn index_to_time(index: usize) -> String {
@@ -21,13 +23,17 @@ fn index_to_day(index: usize) -> Option<Day> {
 
 // ========== DATA TYPES ============
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum EventType {
     Pkmn,
     Magic,
     Class,
     AdultParty,
     KidsMagic,
+    Lcg,
+    XWing,
+    Rpg,
+    GuildOfHeroes,
 }
 
 #[derive(Clone, Debug)]
@@ -43,7 +49,8 @@ pub enum Day {
 
 #[derive(Clone)]
 pub struct Event {
-    required_emp_ids: Vec<String>,
+    name: String,
+    req_emp_ids: Vec<String>,
     day: Day,
     start: Time,
     end: Time,
@@ -99,29 +106,36 @@ impl Day {
 
 impl Event {
     // Constructor
-    pub fn new(day: Day, start: Time, end: Time, kind: EventType) -> Event {
+    pub fn new(name: String, day: Day, start: Time, end: Time, kind: EventType) -> Event {
         //! Creates a new event with empty employee requirements.
-        Event { required_emp_ids: Vec::new(), day, start, end, kind }
+        Event { req_emp_ids: Vec::new(), name, day, start, end, kind }
     }
     // Modification
     pub fn add_employee(&mut self, emp_id: String) {
         //! Add an employee who is required to work this event/class.
-        self.required_emp_ids.push(emp_id);
+        self.req_emp_ids.push(emp_id);
     }
     pub fn add_employees(&mut self, emp_ids: Vec<String>) {
         //! Add a group of employees who are required to work this event/class.
-        self.required_emp_ids.extend(emp_ids);
+        self.req_emp_ids.extend(emp_ids);
     }
     // Access
     pub fn req_ids(&self) -> &Vec<String> {
         //! Return IDs of all employees required to work this event.
-        &self.required_emp_ids
+        &self.req_emp_ids
     }
     pub fn has_reqs(&self) -> bool {
         //! Check if this event has employee requirements.
-        !self.required_emp_ids.is_empty()
+        !self.req_emp_ids.is_empty()
     }
-
+    pub fn print(&self) {
+        println!("{}", self);
+    }
+}
+impl fmt::Display for Event {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{: >9} {: <6} - {: <6} | {} ({:?})", self.day.to_string(), self.start.to_string_12h(), self.end.to_string_12h(), self.name, self.kind)
+    }
 }
 
 impl Shift {
@@ -268,6 +282,11 @@ impl Schedule {
             }
         }
     }
+    pub fn print_events(&self) -> () {
+        for event in self.events.iter() {
+            event.print();
+        }
+    }
     pub fn print(&self) -> () {
         //! Print all currently-assigned shifts for the week.
         for (i, day) in self.shifts.iter().enumerate() {
@@ -282,8 +301,8 @@ impl Schedule {
         &self.events
     }
     // Modification
-    pub fn add_event(&mut self, kind: EventType, day: Day, start: Time, end: Time) -> &mut Event {
-        let ev = Event::new(day, start, end, kind);
+    pub fn add_event(&mut self, name: &str, kind: EventType, day: Day, start: Time, end: Time) -> &mut Event {
+        let ev = Event::new(name.to_string(), day, start, end, kind);
         self.events.push(ev);
         let li = self.events.len() - 1;
         &mut self.events[li]
