@@ -30,7 +30,6 @@ pub enum EventType {
     KidsMagic,
 }
 
-/// The days of the week. They implement conversion to index and string to enable internal functionality.
 #[derive(Clone, Debug)]
 pub enum Day {
     Saturday,
@@ -57,18 +56,12 @@ struct Shift {
     end: Time,
 }
 
-/// A time of day, with internal string and QuarterIndex (`qi`) representation.
 #[derive(Debug, Clone)]
 pub struct Time {
     string: String,
     qi: usize,
 }
 
-/// A week's schedule.
-///
-/// `events` holds a Vec<> of all events and classes within the week.
-/// `raw_reqs` holds an array of arrays of quarter-hourly staffing requirements for each weekday.
-/// `shifts` is an array of Vec<>s of currently-scheduled shifts.
 pub struct Schedule {
     events: Vec<Event>,
     raw_reqs: [[i32; 24 * 4]; 7],
@@ -243,6 +236,7 @@ impl Time {
         format!("{}:{:0>2}", hours, minutes*15)
     }
 }
+
 impl PartialEq for Time {
     fn eq(&self, other: &Self) -> bool {
         self.string == other.string && self.qi == other.qi
@@ -274,7 +268,7 @@ impl Schedule {
             }
         }
     }
-    pub fn print_shifts(&self) -> () {
+    pub fn print(&self) -> () {
         //! Print all currently-assigned shifts for the week.
         for (i, day) in self.shifts.iter().enumerate() {
             let day_name = index_to_day(i).unwrap().to_string();

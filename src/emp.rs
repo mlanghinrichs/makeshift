@@ -51,9 +51,14 @@ impl Roster {
     pub fn iter(&self) -> std::collections::hash_map::Iter<String, Employee> {
         self.emps.iter()
     }
+    /// Print all employees on the roster.
+    pub fn print(&self) {
+        for (_s, emp) in self.iter() {
+            emp.print();
+        }
+    }
 }
 
-#[allow(dead_code)]
 impl Employee {
     pub fn new(id: String) -> Employee {
         //! Create a new Employee.

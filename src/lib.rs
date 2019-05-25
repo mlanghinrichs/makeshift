@@ -1,7 +1,7 @@
 pub mod emp;
 pub mod time;
 
-pub fn assign_required_shifts(ros: &emp::Roster, mut sched: time::Schedule) -> time::Schedule {
+pub fn assign_required_shifts(_ros: &emp::Roster, mut sched: time::Schedule) -> time::Schedule {
     let mut assignments: Vec<(String, time::Event)> = Vec::new();
     for event in sched.get_events() {
         if event.has_reqs() {
