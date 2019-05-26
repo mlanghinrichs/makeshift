@@ -5,6 +5,7 @@ use super::emp;
 
 // ==============================================
 
+/// The different types of events run by the store.
 #[derive(Clone, Debug)]
 pub enum EventType {
     Pkmn,
@@ -20,6 +21,7 @@ pub enum EventType {
 
 // ==============================================
 
+/// A day of the week.
 #[derive(Clone, Debug)]
 pub enum Day {
     Saturday,
@@ -75,6 +77,7 @@ impl fmt::Display for Day {
 
 // ==============================================
 
+/// An event or class run by the store.
 #[derive(Clone)]
 pub struct Event {
     name: String,
@@ -122,6 +125,7 @@ impl fmt::Display for Event {
 
 // ==============================================
 
+/// An employee's shift at the store.
 struct Shift {
     emp_id: String,
     start: Time,
@@ -136,6 +140,7 @@ impl fmt::Display for Shift {
 
 // ==============================================
 
+/// A time of day.
 #[derive(Debug, Clone)]
 pub struct Time {
     string: String,
@@ -285,6 +290,7 @@ impl PartialEq for Time {
 
 // ==============================================
 
+/// A full week's schedule, including events and shifts.
 pub struct Schedule {
     events: Vec<Event>,
     raw_reqs: [[i32; 24 * 4]; 7],
@@ -294,6 +300,7 @@ pub struct Schedule {
 impl Schedule {
     // Constructor
     pub fn new() -> Schedule {
+        //! Create a new, empty schedule.
         Schedule {
             events: Vec::new(),
             raw_reqs: [[0; 24*4]; 7],
@@ -317,6 +324,7 @@ impl Schedule {
         }
     }
     pub fn print_events(&self) -> () {
+        //! Print all events listed on this schedule.
         for event in self.events.iter() {
             event.print();
         }
@@ -336,6 +344,7 @@ impl Schedule {
     }
     // Modification
     pub fn add_event(&mut self, name: &str, kind: EventType, day: Day, start: Time, end: Time) -> &mut Event {
+        //! Add an event (class, tournament, etc.) to this schedule.
         let ev = Event::new(name.to_string(), day, start, end, kind);
         self.events.push(ev);
         let li = self.events.len() - 1;
@@ -352,6 +361,7 @@ impl Schedule {
         self.shifts[event.day.to_index()].push(sh);
     }
     pub fn set_hours(&mut self, day: Day, start: usize, end: usize) -> () {
+        //! Set the store's open and close hours for a given day.
         let start = Time::from_hour(start).qi;
         let end = Time::from_hour(end).qi;
         for qi in start-3..start {
@@ -365,6 +375,7 @@ impl Schedule {
         }
     }
     pub fn assign_required_shifts(&mut self, _ros: &emp::Roster) {
+        //! Assign all employees from the Roster to whatever events they must work in this Schedule.
         let mut assignments: Vec<(String, Event)> = Vec::new();
         for event in self.get_events() {
             if event.has_reqs() {

@@ -1,3 +1,4 @@
+//! The emp module contains tools and structures for managing employees and the full store roster thereof.
 use std::collections::HashMap;
 
 //==============================================
@@ -19,16 +20,16 @@ impl Roster {
         //! Add an employee to the roster.
         self.emps.insert(emp.get_id(), emp);
     }
-    /// Get an employee reference from the roster by String ID.
     pub fn get(&self, id: String) -> &Employee {
+        //! Get an employee reference from the roster by String ID.
         self.emps.get(&id).unwrap()
     }
-    /// Return an iterator across the employees in this roster.
     pub fn iter(&self) -> std::collections::hash_map::Iter<String, Employee> {
+        //! Return an iterator across the employees in this roster.
         self.emps.iter()
     }
-    /// Print all employees on the roster.
     pub fn print(&self) {
+        //! Print all employees on the roster.
         for (_s, emp) in self.iter() {
             emp.print();
         }
@@ -71,14 +72,19 @@ impl Employee {
     pub fn can_do_kids_magic(&mut self) {
         self.abils.kids_magic = true;
     }
-    /// `print!()` info about an employee's abilities and availability.
     pub fn print(&self) {
+        //! `print!()` info about an employee's abilities and availability.
         println!("\n=== ID: {} ===", self.get_id());
         self.reqs.print();
         self.abils.print();
     }
     pub fn can_only_close(&mut self) {
         self.reqs.closer_only = true;
+    }
+    pub fn is_class_only(&mut self) {
+        self.reqs.class_only = true;
+        self.change_hours(0, 10).expect("something went wrong in setting hours somehow");
+        self.cant_do_adult_parties();
     }
     pub fn change_hours(&mut self, min: i32, max: i32) -> Result<(), &'static str> {
         //! Change an employee's required hour max/min.
@@ -91,12 +97,8 @@ impl Employee {
             Err("something went wrong!")
         }
     }
-    pub fn is_class_only(&mut self) {
-        self.reqs.class_only = true;
-        self.change_hours(0, 10).expect("something went wrong in setting hours somehow");
-        self.cant_do_adult_parties();
-    }
     pub fn cant_work(&mut self, day: usize) -> () {
+        //! Indicate that this employee can't work a given day.
         if day < 7 {
             self.reqs.can_work_days[day] = false;
         } else {
