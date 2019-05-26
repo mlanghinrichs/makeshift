@@ -1,36 +1,12 @@
 use std::collections::HashMap;
 
+//==============================================
+
 /// The full roster of working employees of the store.
 ///
 /// `self.emps` contains the raw HashMap of ID Strings -> Employees.
 pub struct Roster {
     emps: HashMap<String, Employee>,
-}
-
-#[derive(Clone)]
-/// An employee of the business, identified by the String `self.id`.
-pub struct Employee {
-    pub id: String,
-    reqs: Requirements,
-    abils: Abilities,
-}
-
-#[derive(Clone)]
-struct Requirements {
-    can_work_days: [bool; 7],
-    minimum_hours: i32,
-    maximum_hours: i32,
-    closer_only: bool,
-    class_only: bool,
-}
-
-#[derive(Clone)]
-struct Abilities {
-    pkmn: bool,
-    magic: bool,
-    class: bool,
-    adult_parties: bool,
-    kids_magic: bool,
 }
 
 impl Roster {
@@ -57,6 +33,16 @@ impl Roster {
             emp.print();
         }
     }
+}
+
+//==============================================
+
+#[derive(Clone)]
+/// An employee of the business, identified by the String `self.id`.
+pub struct Employee {
+    pub id: String,
+    reqs: Requirements,
+    abils: Abilities,
 }
 
 impl Employee {
@@ -119,6 +105,17 @@ impl Employee {
     }
 }
 
+//==============================================
+
+#[derive(Clone)]
+struct Requirements {
+    can_work_days: [bool; 7],
+    minimum_hours: i32,
+    maximum_hours: i32,
+    closer_only: bool,
+    class_only: bool,
+}
+
 impl Requirements {
     fn new() -> Requirements {
         Requirements {
@@ -137,6 +134,17 @@ impl Requirements {
         }
         println!("\nHours range: {} - {}", self.minimum_hours, self.maximum_hours)
     }
+}
+
+//==============================================
+
+#[derive(Clone)]
+struct Abilities {
+    pkmn: bool,
+    magic: bool,
+    class: bool,
+    adult_parties: bool,
+    kids_magic: bool,
 }
 
 impl Abilities {

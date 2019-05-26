@@ -50,28 +50,28 @@ mod test_time {
     }
     #[test]
     fn string_12h_1() {
-        assert_eq!(Time::from_hour(0).to_string_12h(), "12:00a".to_string());
-        assert_eq!(Time::from_qi(3).to_string_12h(), "12:45a".to_string());
+        assert_eq!(Time::from_hour(0).to_string(), "12:00a".to_string());
+        assert_eq!(Time::from_qi(3).to_string(), "12:45a".to_string());
         assert_eq!(Time::from_str("0:45").get_qi(), 3);
-        assert_eq!(Time::from_str("0:45").to_string_12h(), "12:45a".to_string());
+        assert_eq!(Time::from_str("0:45").to_string(), "12:45a".to_string());
     }
     #[test]
     fn string_12h_2() {
-        assert_eq!(Time::from_hour(4).to_string_12h(), "4:00a".to_string());
-        assert_eq!(Time::from_qi(21).to_string_12h(), "5:15a".to_string());
-        assert_eq!(Time::from_str("5:45").to_string_12h(), "5:45a".to_string());
+        assert_eq!(Time::from_hour(4).to_string(), "4:00a".to_string());
+        assert_eq!(Time::from_qi(21).to_string(), "5:15a".to_string());
+        assert_eq!(Time::from_str("5:45").to_string(), "5:45a".to_string());
     }
     #[test]
     fn string_12h_3() {
-        assert_eq!(Time::from_hour(12).to_string_12h(), "12:00p".to_string());
-        assert_eq!(Time::from_qi(49).to_string_12h(), "12:15p".to_string());
-        assert_eq!(Time::from_str("12:45").to_string_12h(), "12:45p".to_string());
+        assert_eq!(Time::from_hour(12).to_string(), "12:00p".to_string());
+        assert_eq!(Time::from_qi(49).to_string(), "12:15p".to_string());
+        assert_eq!(Time::from_str("12:45").to_string(), "12:45p".to_string());
     }
     #[test]
     fn string_12h_4() {
-        assert_eq!(Time::from_hour(17).to_string_12h(), "5:00p".to_string());
-        assert_eq!(Time::from_qi(81).to_string_12h(), "8:15p".to_string());
-        assert_eq!(Time::from_str("22:45").to_string_12h(), "10:45p".to_string());
+        assert_eq!(Time::from_hour(17).to_string(), "5:00p".to_string());
+        assert_eq!(Time::from_qi(81).to_string(), "8:15p".to_string());
+        assert_eq!(Time::from_str("22:45").to_string(), "10:45p".to_string());
     }
 }
 

@@ -1,27 +1,9 @@
 //! The time module contains generic scheduling and shift information.
 
 use std::fmt;
+use super::emp;
 
-// ========== INTERNAL UTILITY FUNCTIONS ============
-
-fn index_to_time(index: usize) -> String {
-    format!("{}:{:0>2}", index/4, (index%4)*15)
-}
-
-fn index_to_day(index: usize) -> Option<Day> {
-    match index {
-        0 => Some(Day::Saturday),
-        1 => Some(Day::Sunday),
-        2 => Some(Day::Monday),
-        3 => Some(Day::Tuesday),
-        4 => Some(Day::Wednesday),
-        5 => Some(Day::Thursday),
-        6 => Some(Day::Friday),
-        _ => None
-    }
-}
-
-// ========== DATA TYPES ============
+// ==============================================
 
 #[derive(Clone, Debug)]
 pub enum EventType {
@@ -36,6 +18,8 @@ pub enum EventType {
     GuildOfHeroes,
 }
 
+// ==============================================
+
 #[derive(Clone, Debug)]
 pub enum Day {
     Saturday,
@@ -47,48 +31,18 @@ pub enum Day {
     Friday
 }
 
-#[derive(Clone)]
-pub struct Event {
-    name: String,
-    req_emp_ids: Vec<String>,
-    day: Day,
-    start: Time,
-    end: Time,
-    kind: EventType,
-}
-
-struct Shift {
-    emp_id: String,
-    start: Time,
-    end: Time,
-}
-
-#[derive(Debug, Clone)]
-pub struct Time {
-    string: String,
-    qi: usize,
-}
-
-pub struct Schedule {
-    events: Vec<Event>,
-    raw_reqs: [[i32; 24 * 4]; 7],
-    shifts: [Vec<Shift>; 7]
-}
-
-// ========== METHODS & ASSOCIATED FUNCTIONS ============
-
 impl Day {
-    fn to_string(&self) -> String {
-        let day_name = match self {
-            Day::Saturday => "Saturday",
-            Day::Sunday => "Sunday",
-            Day::Monday => "Monday",
-            Day::Tuesday => "Tuesday",
-            Day::Wednesday => "Wednesday",
-            Day::Thursday => "Thursday",
-            Day::Friday => "Friday",
-        };
-        day_name.to_string()
+    fn from_index(index: usize) -> Option<Day> {
+        match index {
+            0 => Some(Day::Saturday),
+            1 => Some(Day::Sunday),
+            2 => Some(Day::Monday),
+            3 => Some(Day::Tuesday),
+            4 => Some(Day::Wednesday),
+            5 => Some(Day::Thursday),
+            6 => Some(Day::Friday),
+            _ => None
+        }
     }
     fn to_index(&self) -> usize {
         let index = match self {
@@ -104,10 +58,37 @@ impl Day {
     }
 }
 
+impl fmt::Display for Day {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let day_name = match self {
+            Day::Saturday => "Saturday",
+            Day::Sunday => "Sunday",
+            Day::Monday => "Monday",
+            Day::Tuesday => "Tuesday",
+            Day::Wednesday => "Wednesday",
+            Day::Thursday => "Thursday",
+            Day::Friday => "Friday",
+        };
+        write!(f, "{}", day_name)
+    }
+}
+
+// ==============================================
+
+#[derive(Clone)]
+pub struct Event {
+    name: String,
+    req_emp_ids: Vec<String>,
+    day: Day,
+    start: Time,
+    end: Time,
+    kind: EventType,
+}
+
 impl Event {
     // Constructor
     pub fn new(name: String, day: Day, start: Time, end: Time, kind: EventType) -> Event {
-        //! Creates a new event with empty employee requirements.
+        //! Create a new event with empty employee requirements.
         Event { req_emp_ids: Vec::new(), name, day, start, end, kind }
     }
     // Modification
@@ -132,16 +113,33 @@ impl Event {
         println!("{}", self);
     }
 }
+
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{: >9} {: <6} - {: <6} | {} ({:?})", self.day.to_string(), self.start.to_string_12h(), self.end.to_string_12h(), self.name, self.kind)
+        write!(f, "{: >9} {: <6} - {: <6} | {} ({:?})", self.day.to_string(), self.start.to_string(), self.end.to_string(), self.name, self.kind)
     }
 }
 
-impl Shift {
-    fn to_string(&self) -> String {
-        format!("{} => {} - {}", self.emp_id, self.start.string, self.end.string)
+// ==============================================
+
+struct Shift {
+    emp_id: String,
+    start: Time,
+    end: Time,
+}
+
+impl fmt::Display for Shift {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} => {} - {}", self.emp_id, self.start.string, self.end.string)
     }
+}
+
+// ==============================================
+
+#[derive(Debug, Clone)]
+pub struct Time {
+    string: String,
+    qi: usize,
 }
 
 impl Time {
@@ -209,14 +207,14 @@ impl Time {
         //! ```
         self.string.clone()
     }
-    pub fn to_string_12h(&self) -> String {
+    pub fn to_string(&self) -> String {
         //! Return a 12-hour (US) string of this time.
         //! 
         //! # Examples
         //! ```
         //! use sched_lib::time::Time as Time;
-        //! println!("{}", Time::from_hour(23).to_string_12h()); // "11:00p"
-        //! println!("{}", Time::from_hour(9).to_string_12h()); // "9:00a"
+        //! println!("{}", Time::from_hour(23).to_string()); // "11:00p"
+        //! println!("{}", Time::from_hour(9).to_string()); // "9:00a"
         //! ```
         let qi = self.qi;
         if qi < 4 {
@@ -251,10 +249,46 @@ impl Time {
     }
 }
 
+impl fmt::Display for Time {
+        //! Display a 12-hour (US) string of this time.
+        //! 
+        //! # Examples
+        //! ```
+        //! use sched_lib::time::Time as Time;
+        //! println!("{}", Time::from_hour(23).to_string()); // "11:00p"
+        //! println!("{}", Time::from_hour(9).to_string()); // "9:00a"
+        //! ```
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+
+        let qi = self.qi;
+        if qi < 4 {
+            // 12:MMa
+            write!(f, "12:{:0>2}a", qi*15)
+        } else if qi >= 4 && qi < 12*4 {
+            // 1:MMa -> 11:MMa
+            write!(f, "{}:{:0>2}a", qi/4, (qi%4)*15)
+        } else if qi >= 12*4 && qi < 13*4 {
+            // 12:MMp
+            write!(f, "12:{:0>2}p", (qi%4)*15)
+        } else {
+            // 1:MMp -> 11:MMp
+            write!(f, "{}:{:0>2}p", (qi/4)-12, (qi%4)*15)
+        }
+    }
+}
+
 impl PartialEq for Time {
     fn eq(&self, other: &Self) -> bool {
         self.string == other.string && self.qi == other.qi
     }
+}
+
+// ==============================================
+
+pub struct Schedule {
+    events: Vec<Event>,
+    raw_reqs: [[i32; 24 * 4]; 7],
+    shifts: [Vec<Shift>; 7]
 }
 
 impl Schedule {
@@ -270,14 +304,14 @@ impl Schedule {
     pub fn print_reqs(&self) -> () {
         //! Print the quarter-hourly staffing requirements for all time during which the store is open.
         for (i, day) in self.raw_reqs.iter().enumerate() {
-            let day_name = match index_to_day(i) {
+            let day_name = match Day::from_index(i) {
                 Some(d) => d.to_string(),
                 None => panic!("Bad day above!")
             };
             println!("\n{}", day_name);
             for (j, quarter_req) in day.iter().enumerate() {
                 if *quarter_req > 0 {
-                    println!("{} - {}", index_to_time(j), quarter_req);
+                    println!("{} - {}", Time::from_qi(j).to_string(), quarter_req);
                 }
             }
         }
@@ -290,7 +324,7 @@ impl Schedule {
     pub fn print(&self) -> () {
         //! Print all currently-assigned shifts for the week.
         for (i, day) in self.shifts.iter().enumerate() {
-            let day_name = index_to_day(i).unwrap().to_string();
+            let day_name = Day::from_index(i).unwrap().to_string();
             println!("\n{}\n=========", day_name);
             for shift in day.iter() {
                 println!("{}", shift.to_string());
@@ -328,6 +362,19 @@ impl Schedule {
         }
         for qi in end+1..=end+3 {
             self.raw_reqs[day.to_index()][qi] = 3;
+        }
+    }
+    pub fn assign_required_shifts(&mut self, _ros: &emp::Roster) {
+        let mut assignments: Vec<(String, Event)> = Vec::new();
+        for event in self.get_events() {
+            if event.has_reqs() {
+                for emp_id in event.req_ids() {
+                    assignments.push((emp_id.clone(), event.clone()));
+                }
+            }
+        }
+        for (id, ev) in assignments {
+            self.assign_event(id, ev);
         }
     }
 }
