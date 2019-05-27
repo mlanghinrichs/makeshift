@@ -22,7 +22,7 @@ pub enum EventType {
 // ==============================================
 
 /// A day of the week.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Day {
     Saturday,
     Sunday,
@@ -82,9 +82,10 @@ impl fmt::Display for Day {
 pub struct Event {
     name: String,
     req_emp_ids: Vec<String>,
-    day: Day,
-    start: Time,
-    end: Time,
+    pub day: Day,
+    pub start: Time,
+    pub end: Time,
+    pub num_emps: i32,
     kind: EventType,
 }
 
@@ -92,16 +93,27 @@ impl Event {
     // Constructor
     pub fn new(name: String, day: Day, start: Time, end: Time, kind: EventType) -> Event {
         //! Create a new event with empty employee requirements.
-        Event { req_emp_ids: Vec::new(), name, day, start, end, kind }
+        Event { req_emp_ids: Vec::new(), name, day, start, end, kind, num_emps: 1 }
     }
     // Modification
     pub fn add_employee(&mut self, emp_id: String) {
         //! Add an employee who is required to work this event/class.
         self.req_emp_ids.push(emp_id);
+        let reqs: i32 = self.req_emp_ids.len() as i32;
+        if reqs > self.num_emps {
+            self.num_emps = reqs;
+        }
     }
     pub fn add_employees(&mut self, emp_ids: Vec<String>) {
         //! Add a group of employees who are required to work this event/class.
         self.req_emp_ids.extend(emp_ids);
+        let reqs: i32 = self.req_emp_ids.len() as i32;
+        if reqs > self.num_emps {
+            self.num_emps = reqs;
+        }
+    }
+    pub fn staffing_req(&mut self, num_emps: i32) {
+        self.num_emps = num_emps;
     }
     // Access
     pub fn req_ids(&self) -> &Vec<String> {
@@ -423,6 +435,15 @@ impl Schedule {
                 out[index] += 1;
             }
         }
+        for event in self.events.iter() {
+            if day == event.day {
+                let s = event.start.get_qi();
+                let e = event.end.get_qi();
+                for index in s..e {
+                    out[index] -= event.num_emps;
+                }
+            }
+        }
         out
     }
     fn adequate_coverage(&self) -> bool {
@@ -434,7 +455,7 @@ impl Schedule {
             for j in 0..len {
                 if coverage[j] < self.raw_reqs[i][j] {
                     adequate = false;
-                    println!("Insufficient coverage at {} on {}", Time::from_qi(j), Day::from_index(i).unwrap());
+                    println!("Low coverage at {} on {}: {}", Time::from_qi(j), Day::from_index(i).unwrap(), coverage[j]);
                 }
             }
         }
