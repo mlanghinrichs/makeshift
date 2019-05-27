@@ -241,6 +241,9 @@ impl Time {
         self.qi
     }
     // Conversion Utilities
+    pub fn duration_string(qi: usize) -> String {
+        Time::qi_to_string(qi)
+    }
     fn string_to_qi(s: &str) -> usize {
         let v: Vec<&str> = s.split(":").collect();
         let hours: usize = v[0].parse().unwrap();
@@ -387,5 +390,42 @@ impl Schedule {
         for (id, ev) in assignments {
             self.assign_event(id, ev);
         }
+    }
+    // Validation
+    pub fn hours_assigned_valid(&self, id: &str, ros: &emp::Roster) -> bool {
+        let mut total = 0;
+        for day in self.shifts.iter() {
+            for shift in day.iter() {
+                if shift.emp_id == id {
+                    total += shift.end.get_qi() - shift.start.get_qi();
+                }
+            }
+        }
+        let em = ros.get(id.to_string());
+        let min = em.min_hours() * 4;
+        let max = em.max_hours() * 4;
+        if min <= total && total <= max {
+            true
+        } else {
+            println!(">>> {} - {}", id, Time::duration_string(total));
+            false
+        }
+    }
+    pub fn all_shifts_okay_length(&self, _ros: &emp::Roster) -> bool {
+        true
+    }
+    pub fn is_valid(&self, ros: &emp::Roster) -> bool {
+        let mut valid = true;
+        for (id, _emp) in ros.iter() {
+            if !self.hours_assigned_valid(id, ros) {
+                println!("{} has invalid # of hours", id);
+                valid = false;
+            }
+        }
+        if !self.all_shifts_okay_length(ros) {
+            println!("Shift length issue - schedule invalid");
+            valid = false;
+        }
+        valid
     }
 }

@@ -22,6 +22,7 @@ impl Roster {
     }
     pub fn get(&self, id: String) -> &Employee {
         //! Get an employee reference from the roster by String ID.
+        // Todo fix this nonsense, see issue #16
         self.emps.get(&id).unwrap()
     }
     pub fn iter(&self) -> std::collections::hash_map::Iter<String, Employee> {
@@ -86,9 +87,9 @@ impl Employee {
         self.change_hours(0, 10).expect("something went wrong in setting hours somehow");
         self.cant_do_adult_parties();
     }
-    pub fn change_hours(&mut self, min: i32, max: i32) -> Result<(), &'static str> {
+    pub fn change_hours(&mut self, min: usize, max: usize) -> Result<(), &'static str> {
         //! Change an employee's required hour max/min.
-        if max > min && min >= 0 && max <= 40 {
+        if max > min && max <= 40 {
             self.reqs.minimum_hours = min;
             self.reqs.maximum_hours = max;
             Ok(())
@@ -105,6 +106,12 @@ impl Employee {
             println!("invalid day # - did not change")
         }
     }
+    pub fn min_hours(&self) -> usize {
+        self.reqs.minimum_hours
+    }
+    pub fn max_hours(&self) -> usize {
+        self.reqs.maximum_hours
+    }
 }
 
 //==============================================
@@ -112,8 +119,8 @@ impl Employee {
 #[derive(Clone)]
 struct Requirements {
     can_work_days: [bool; 7],
-    minimum_hours: i32,
-    maximum_hours: i32,
+    minimum_hours: usize,
+    maximum_hours: usize,
     closer_only: bool,
     class_only: bool,
 }
