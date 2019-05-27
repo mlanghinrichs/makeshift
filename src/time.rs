@@ -127,9 +127,9 @@ impl fmt::Display for Event {
 
 /// An employee's shift at the store.
 struct Shift {
-    emp_id: String,
-    start: Time,
-    end: Time,
+    pub emp_id: String,
+    pub start: Time,
+    pub end: Time,
 }
 
 impl fmt::Display for Shift {
@@ -367,7 +367,7 @@ impl Schedule {
         //! Set the store's open and close hours for a given day.
         let start = Time::from_hour(start).qi;
         let end = Time::from_hour(end).qi;
-        for qi in start-3..start {
+        for qi in start-1..start {
             self.raw_reqs[day.to_index()][qi] = 3;
         }
         for qi in start..=end {
@@ -392,7 +392,7 @@ impl Schedule {
         }
     }
     // Validation
-    pub fn hours_assigned_valid(&self, id: &str, ros: &emp::Roster) -> bool {
+    fn hours_assigned_valid(&self, id: &str, ros: &emp::Roster) -> bool {
         let mut total = 0;
         for day in self.shifts.iter() {
             for shift in day.iter() {
@@ -411,8 +411,34 @@ impl Schedule {
             false
         }
     }
-    pub fn all_shifts_okay_length(&self, _ros: &emp::Roster) -> bool {
+    fn all_shifts_okay_length(&self, _ros: &emp::Roster) -> bool {
         true
+    }
+    fn coverage(&self, day: Day) -> [i32; 96] {
+        let mut out = [0; 96];
+        for shift in self.shifts[day.to_index()].iter() {
+            let s = shift.start.get_qi();
+            let e = shift.end.get_qi();
+            for index in s..e {
+                out[index] += 1;
+            }
+        }
+        out
+    }
+    fn adequate_coverage(&self) -> bool {
+        let mut adequate = true;
+        for i in 0..7 {
+            println!("Checking coverage for {}", Day::from_index(i).unwrap());
+            let len = self.raw_reqs[i].len();
+            let coverage = self.coverage(Day::from_index(i).unwrap());
+            for j in 0..len {
+                if coverage[j] < self.raw_reqs[i][j] {
+                    adequate = false;
+                    println!("Insufficient coverage at {} on {}", Time::from_qi(j), Day::from_index(i).unwrap());
+                }
+            }
+        }
+        adequate
     }
     pub fn is_valid(&self, ros: &emp::Roster) -> bool {
         let mut valid = true;
@@ -424,6 +450,10 @@ impl Schedule {
         }
         if !self.all_shifts_okay_length(ros) {
             println!("Shift length issue - schedule invalid");
+            valid = false;
+        }
+        if !self.adequate_coverage() {
+            println!("Not enough coverage - schedule invalid");
             valid = false;
         }
         valid
