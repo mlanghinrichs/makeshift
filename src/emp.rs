@@ -38,6 +38,17 @@ impl Roster {
     }
 }
 
+impl fmt::Display for Roster {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut out = String::new();
+        for (_s, emp) in self.iter() {
+            out.push_str("\n");
+            out.push_str(&emp.to_string());
+        }
+        write!(f, "{}", out)
+    }
+}
+
 //==============================================
 
 #[derive(Clone)]
@@ -112,9 +123,9 @@ impl fmt::Display for Employee {
         let mut out = String::new();
         out.push_str(&format!("\n=== ID: {} ===", self.get_id()));
         let weekdays = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
-        out.push_str("Can work: ");
+        out.push_str("\nCan work: \n");
         for (n, name) in weekdays.iter().enumerate() {
-            if self.can_work_days[n] { out.push_str(name); }
+            if self.can_work_days[n] { out.push_str(&format!("{} ", name)); }
         }
         out.push_str(&format!("\nHours range: {} - {}", self.minimum_hours, self.maximum_hours));
         write!(f, "{}", out)
