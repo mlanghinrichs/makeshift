@@ -316,6 +316,21 @@ impl fmt::Debug for Schedule {
     }
 }
 
+impl fmt::Display for Schedule {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut out = String::new();
+        for (i, day) in self.shifts.iter().enumerate() {
+            let day_name = Day::from_index(i).unwrap();
+            out.push_str(&format!("\n{}\n=========", day_name));
+            for shift in day.iter() {
+                out.push_str(&format!("\n{}", shift));
+            }
+            if i != 6 { out.push_str("\n") }
+        }
+        write!(f, "{}", out)
+    }
+}
+
 impl Schedule {
     // Constructor
     pub fn new() -> Schedule {
@@ -348,23 +363,13 @@ impl Schedule {
             event.print();
         }
     }
-    pub fn print(&self) -> () {
-        //! Print all currently-assigned shifts for the week.
-        for (i, day) in self.shifts.iter().enumerate() {
-            let day_name = Day::from_index(i).unwrap().to_string();
-            println!("\n{}\n=========", day_name);
-            for shift in day.iter() {
-                println!("{}", shift.to_string());
-            }
-        }
-    }
     pub fn get_events(&self) -> &Vec<Event> {
         &self.events
     }
     // Modification
-    pub fn add_event(&mut self, name: &str, kind: String, day: Day, start: Time, end: Time) -> &mut Event {
+    pub fn add_event(&mut self, name: &str, kind: &str, day: Day, start: Time, end: Time) -> &mut Event {
         //! Add an event (class, tournament, etc.) to this schedule.
-        let ev = Event::new(name.to_string(), day, start, end, kind);
+        let ev = Event::new(name.to_string(), day, start, end, kind.to_string());
         self.events.push(ev);
         let li = self.events.len() - 1;
         &mut self.events[li]
