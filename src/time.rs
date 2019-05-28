@@ -5,22 +5,6 @@ use super::emp;
 
 // ==============================================
 
-/// The different types of events run by the store.
-#[derive(Clone, Debug)]
-pub enum EventType {
-    Pkmn,
-    Magic,
-    Class,
-    AdultParty,
-    KidsMagic,
-    Lcg,
-    XWing,
-    Rpg,
-    GuildOfHeroes,
-}
-
-// ==============================================
-
 /// A day of the week.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Day {
@@ -86,12 +70,12 @@ pub struct Event {
     pub start: Time,
     pub end: Time,
     pub num_emps: i32,
-    kind: EventType,
+    kind: String,
 }
 
 impl Event {
     // Constructor
-    pub fn new(name: String, day: Day, start: Time, end: Time, kind: EventType) -> Event {
+    pub fn new(name: String, day: Day, start: Time, end: Time, kind: String) -> Event {
         //! Create a new event with empty employee requirements.
         Event { req_emp_ids: Vec::new(), name, day, start, end, kind, num_emps: 1 }
     }
@@ -358,7 +342,7 @@ impl Schedule {
         &self.events
     }
     // Modification
-    pub fn add_event(&mut self, name: &str, kind: EventType, day: Day, start: Time, end: Time) -> &mut Event {
+    pub fn add_event(&mut self, name: &str, kind: String, day: Day, start: Time, end: Time) -> &mut Event {
         //! Add an event (class, tournament, etc.) to this schedule.
         let ev = Event::new(name.to_string(), day, start, end, kind);
         self.events.push(ev);

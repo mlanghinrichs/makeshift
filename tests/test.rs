@@ -77,9 +77,9 @@ mod test_time {
 
 #[cfg(test)]
 mod test_time_event {
-    use sched_lib::time::{ Event, Day, Time, EventType };
+    use sched_lib::time::{ Event, Day, Time };
     fn setup() -> Event {
-        let mut ev = Event::new("Name".to_string(), Day::Saturday, Time::from_hour(12), Time::from_hour(17), EventType::Magic);
+        let mut ev = Event::new("Name".to_string(), Day::Saturday, Time::from_hour(12), Time::from_hour(17), "Magic".to_string());
         ev.add_employee("Matt".to_string());
         ev
     }
