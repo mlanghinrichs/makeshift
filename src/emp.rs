@@ -7,6 +7,7 @@ use std::fmt;
 /// The full roster of working employees of the store.
 ///
 /// `self.emps` contains the raw HashMap of ID Strings -> Employees.
+#[derive(Debug)]
 pub struct Roster {
     emps: HashMap<String, Employee>,
 }
@@ -51,7 +52,7 @@ impl fmt::Display for Roster {
 
 //==============================================
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 /// An employee of the business, identified by the String `self.id`.
 pub struct Employee {
     pub id: String,

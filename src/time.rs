@@ -62,7 +62,7 @@ impl fmt::Display for Day {
 // ==============================================
 
 /// An event or class run by the store.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Event {
     name: String,
     req_emp_ids: Vec<String>,
@@ -122,6 +122,7 @@ impl fmt::Display for Event {
 // ==============================================
 
 /// An employee's shift at the store.
+#[derive(Debug)]
 struct Shift {
     pub emp_id: String,
     pub start: Time,
@@ -294,6 +295,25 @@ pub struct Schedule {
     events: Vec<Event>,
     raw_reqs: [[i32; 24 * 4]; 7],
     shifts: [Vec<Shift>; 7]
+}
+
+impl fmt::Debug for Schedule {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut rr = String::new();
+        for day_arr in self.raw_reqs.iter() {
+            rr.push_str("[");
+            for (i, cover) in day_arr.iter().enumerate() {
+                rr.push_str(&format!("{}", cover));
+                if i != day_arr.len()-1 { rr.push_str(", ") }
+            }
+            rr.push_str("]\n");
+        }
+        f.debug_struct("Schedule")
+            .field("events", &self.events)
+            .field("shifts", &self.shifts)
+            .field("raw_reqs", &rr)
+            .finish()
+    }
 }
 
 impl Schedule {
