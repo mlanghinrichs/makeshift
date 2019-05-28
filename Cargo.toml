@@ -5,3 +5,4 @@ authors = ["Matt Langhinrichs <mlanghinrichs@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+csv = "1"
