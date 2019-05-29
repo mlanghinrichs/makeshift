@@ -85,8 +85,8 @@ impl Employee {
             println!("Updated {} to {} in {}", key, val, self.id);
         };
     }
-    pub fn add_role(&mut self, r: String) {
-        self.roles.push(r);
+    pub fn add_role(&mut self, s: &str) {
+        self.roles.push(s.to_owned());
     }
     pub fn is_class_only(&mut self) {
         self.change_hours(0, 10).expect("something went wrong in setting hours somehow");

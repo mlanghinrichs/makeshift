@@ -18,7 +18,7 @@ pub enum Day {
 }
 
 impl Day {
-    fn from_index(index: usize) -> Option<Day> {
+    pub fn from_index(index: usize) -> Option<Day> {
         match index {
             0 => Some(Day::Saturday),
             1 => Some(Day::Sunday),
@@ -30,7 +30,19 @@ impl Day {
             _ => None
         }
     }
-    fn to_index(&self) -> usize {
+    pub fn from_str(s: &str) -> Option<Day> {
+        match s {
+            "Saturday" => Some(Day::Saturday),
+            "Sunday" => Some(Day::Sunday),
+            "Monday" => Some(Day::Monday),
+            "Tuesday" => Some(Day::Tuesday),
+            "Wednesday" => Some(Day::Wednesday),
+            "Thursday" => Some(Day::Thursday),
+            "Friday" => Some(Day::Friday),
+            _ => None
+        }
+    }
+    pub fn to_index(&self) -> usize {
         let index = match self {
             Day::Saturday => 0,
             Day::Sunday => 1,
