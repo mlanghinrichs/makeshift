@@ -1,6 +1,6 @@
 use csv;
 use super::emp::{ Employee, Roster };
-use super::time::Day;
+use super::time::{ Day, Event, Time };
 use std::error::Error;
 use std::fs;
 
@@ -26,6 +26,22 @@ pub fn get_roster() -> Result<Roster, Box<Error>> {
     Ok(ros)
 }
 
+pub fn get_events() -> Result<Vec<Event>, Box<Error>> {
+    let file = fs::File::open("../sched_lib/docs/events.csv")?;
+    let mut rdr = csv::Reader::from_reader(file);
+    let mut out = Vec::new();
+    for result in rdr.records() {
+        let record = result?;
+        if let Ok(event) = build_event(&record) {
+            println!("{:#?}", event);
+            out.push(event);
+        } else {
+            println!("Error reading record: {:#?}", record);
+        }
+    }
+    Ok(out)
+}
+
 fn build_empl(sr: &csv::StringRecord, headers: &Vec<String>) -> Result<Employee, Box<Error>> {
     // id
     let mut empl = Employee::new(sr[0].to_owned());
@@ -49,4 +65,19 @@ fn build_empl(sr: &csv::StringRecord, headers: &Vec<String>) -> Result<Employee,
     }
 
     Ok(empl)
+}
+
+fn build_event(sr: &csv::StringRecord) -> Result<Event, Box<Error>> {
+    let name = sr[0].to_owned();
+    let kind = sr[1].to_owned();
+    let day = Day::from_str(&sr[2]).ok_or("bad day string")?;
+    let start = Time::from_str(&sr[3]);
+    let end = Time::from_str(&sr[4]);
+    let num_emps: i32 = sr[7].parse()?;
+    let mut req_emp_ids: Vec<String> = Vec::new();
+    for empl in sr[8].split(", ") {
+        req_emp_ids.push(empl.to_owned());
+    }
+    let out = Event { name, req_emp_ids, day, start, end, num_emps, kind };
+    Ok(out)
 }

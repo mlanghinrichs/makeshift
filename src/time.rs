@@ -76,13 +76,13 @@ impl fmt::Display for Day {
 /// An event or class run by the store.
 #[derive(Clone, Debug)]
 pub struct Event {
-    name: String,
-    req_emp_ids: Vec<String>,
+    pub name: String,
+    pub req_emp_ids: Vec<String>,
     pub day: Day,
     pub start: Time,
     pub end: Time,
     pub num_emps: i32,
-    kind: String,
+    pub kind: String,
 }
 
 impl Event {
