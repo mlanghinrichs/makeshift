@@ -83,13 +83,25 @@ pub struct Event {
     pub end: Time,
     pub num_emps: i32,
     pub kind: String,
+    pub setup: Time,
+    pub breakdown: Time,
 }
 
 impl Event {
     // Constructor
     pub fn new(name: String, day: Day, start: Time, end: Time, kind: String) -> Event {
         //! Create a new event with empty employee requirements.
-        Event { req_emp_ids: Vec::new(), name, day, start, end, kind, num_emps: 1 }
+        Event {
+            req_emp_ids: Vec::new(),
+            name,
+            day,
+            start,
+            end,
+            kind,
+            num_emps: 1,
+            setup: Time::from_qi(2),
+            breakdown: Time::from_hour(2),
+        }
     }
     // Modification
     pub fn add_employee(&mut self, emp_id: String) {
@@ -110,6 +122,10 @@ impl Event {
     }
     pub fn staffing_req(&mut self, num_emps: i32) {
         self.num_emps = num_emps;
+    }
+    pub fn setup_breakdown(&mut self, s: usize, b: usize) {
+        self.setup = Time::from_qi(s);
+        self.breakdown = Time::from_qi(b);
     }
     // Access
     pub fn req_ids(&self) -> &Vec<String> {
@@ -393,7 +409,14 @@ impl Schedule {
     }
     pub fn assign_event(&mut self, emp_id: String,  event: Event) {
         //! Assign an event to the employee with id emp_id.
-        let sh = Shift { emp_id, start: event.start.clone(), end: event.end.clone() };
+        // Move start time back by the setup amount
+        let start = event.start.get_qi() - event.setup.get_qi();
+        let start = Time::from_qi(start);
+        // Move end time forward by the breakdown amount
+        let end = event.end.get_qi() + event.breakdown.get_qi();
+        let end = Time::from_qi(end);
+        
+        let sh = Shift { emp_id, start, end };
         self.shifts[event.day.to_index()].push(sh);
     }
     pub fn set_hours(&mut self, day: Day, start: usize, end: usize) -> () {
@@ -458,8 +481,8 @@ impl Schedule {
         }
         for event in self.events.iter() {
             if day == event.day {
-                let s = event.start.get_qi();
-                let e = event.end.get_qi();
+                let s = event.start.get_qi() - event.setup.get_qi();
+                let e = event.end.get_qi() + event.breakdown.get_qi();
                 for index in s..e {
                     out[index] -= event.num_emps;
                 }

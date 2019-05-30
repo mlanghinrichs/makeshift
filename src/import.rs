@@ -56,7 +56,9 @@ fn build_empl(sr: &csv::StringRecord, headers: &Vec<String>) -> Result<Employee,
     let max: usize = sr[3].parse()?;
     empl.change_hours(min, max)?;
 
-    empl.add_role(&sr[4]);
+    for role in sr[4].split(", ") {
+        empl.add_role(role);
+    }
 
     for i in 5..sr.len() {
         if &sr[i] != "" {
@@ -73,11 +75,13 @@ fn build_event(sr: &csv::StringRecord) -> Result<Event, Box<Error>> {
     let day = Day::from_str(&sr[2]).ok_or("bad day string")?;
     let start = Time::from_str(&sr[3]);
     let end = Time::from_str(&sr[4]);
+    let setup = Time::from_str(&sr[5]);
+    let breakdown = Time::from_str(&sr[6]);
     let num_emps: i32 = sr[7].parse()?;
     let mut req_emp_ids: Vec<String> = Vec::new();
     for empl in sr[8].split(", ") {
         req_emp_ids.push(empl.to_owned());
     }
-    let out = Event { name, req_emp_ids, day, start, end, num_emps, kind };
+    let out = Event { name, req_emp_ids, day, start, end, num_emps, kind, setup, breakdown };
     Ok(out)
 }
