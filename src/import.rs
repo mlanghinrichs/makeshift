@@ -1,3 +1,4 @@
+//! File importing and parsing.
 use csv;
 use super::emp::{ Employee, Roster };
 use super::time::{ Day, Event, Time };
@@ -79,8 +80,10 @@ fn build_event(sr: &csv::StringRecord) -> Result<Event, Box<Error>> {
     let breakdown = Time::from_str(&sr[6]);
     let num_emps: i32 = sr[7].parse()?;
     let mut req_emp_ids: Vec<String> = Vec::new();
-    for empl in sr[8].split(", ") {
-        req_emp_ids.push(empl.to_owned());
+    if &sr[8] != "" {
+        for empl in sr[8].split(", ") {
+            req_emp_ids.push(empl.to_owned());
+        }
     }
     let out = Event { name, req_emp_ids, day, start, end, num_emps, kind, setup, breakdown };
     Ok(out)

@@ -1,5 +1,6 @@
 //! The time module contains generic scheduling and shift information.
 
+use rand;
 use std::fmt;
 use super::emp;
 
@@ -155,6 +156,28 @@ struct Shift {
     pub emp_id: String,
     pub start: Time,
     pub end: Time,
+}
+
+impl Shift {
+    // todo error checking
+    pub fn extend(&mut self, forward: bool) {
+        if forward {
+            self.end = Time::from_qi(self.end.get_qi() + 1);
+        } else {
+            self.start = Time::from_qi(self.start.get_qi() - 1);
+        }
+    }
+    // todo error checking
+    pub fn extend_by(&mut self, forward: bool, amnt: Time) {
+        if forward {
+            self.end = Time::from_qi(self.end.get_qi() + amnt.get_qi());
+        } else {
+            self.start = Time::from_qi(self.start.get_qi() - amnt.get_qi());
+        }
+    }
+    pub fn len(&self) -> usize {
+        self.end.get_qi() - self.start.get_qi()
+    }
 }
 
 impl fmt::Display for Shift {
@@ -320,7 +343,7 @@ impl PartialEq for Time {
 
 /// A full week's schedule, including events and shifts.
 pub struct Schedule {
-    events: Vec<Event>,
+    pub events: Vec<Event>,
     raw_reqs: [[i32; 24 * 4]; 7],
     shifts: [Vec<Shift>; 7]
 }
@@ -522,5 +545,27 @@ impl Schedule {
             valid = false;
         }
         valid
+    }
+    // Generation
+    pub fn expand_shifts(&mut self, emp_id: String) {
+        for i in 0..7 {
+            for shift in &mut self.shifts[i] {
+                if shift.emp_id != emp_id { continue }
+                let direc: bool = rand::random();
+                while shift.len() < 8*4
+                    && self.raw_reqs[i][shift.end.get_qi()+1] != 0
+                    && self.raw_reqs[i][shift.start.get_qi()-1] != 0 {
+                        println!("Extending {}", (if direc {"forward"} else {"backward"}));
+                        shift.extend(direc);
+                }
+                while shift.len() < 8*4
+                    && self.raw_reqs[i][shift.end.get_qi()+1] != 0
+                    && self.raw_reqs[i][shift.start.get_qi()-1] != 0 {
+                        println!("Extending {}", (if !direc {"forward"} else {"backward"}));
+                    shift.extend(!direc);
+                }
+                println!("New shift: {} {} -> {}", Day::from_index(i).unwrap(), shift.start.to_string(), shift.end.to_string());
+            }
+        }
     }
 }
