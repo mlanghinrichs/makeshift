@@ -89,7 +89,8 @@ impl Employee {
         self.roles.push(s.to_owned());
     }
     pub fn is_class_only(&mut self) {
-        self.change_hours(0, 10).expect("something went wrong in setting hours somehow");
+        self.change_hours(0, 10)
+            .expect("something went wrong in setting hours somehow");
         self.set_abil("Class", 3);
     }
     pub fn change_hours(&mut self, min: usize, max: usize) -> Result<(), &'static str> {
@@ -126,9 +127,14 @@ impl fmt::Display for Employee {
         let weekdays = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
         out.push_str("\nCan work: \n");
         for (n, name) in weekdays.iter().enumerate() {
-            if self.can_work_days[n] { out.push_str(&format!("{} ", name)); }
+            if self.can_work_days[n] {
+                out.push_str(&format!("{} ", name));
+            }
         }
-        out.push_str(&format!("\nHours range: {} - {}", self.minimum_hours, self.maximum_hours));
+        out.push_str(&format!(
+            "\nHours range: {} - {}",
+            self.minimum_hours, self.maximum_hours
+        ));
         write!(f, "{}", out)
     }
 }

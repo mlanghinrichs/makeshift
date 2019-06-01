@@ -1,8 +1,8 @@
 //! The time module contains generic scheduling and shift information.
 
+use super::emp;
 use rand;
 use std::fmt;
-use super::emp;
 
 // ==============================================
 
@@ -15,7 +15,7 @@ pub enum Day {
     Tuesday,
     Wednesday,
     Thursday,
-    Friday
+    Friday,
 }
 
 impl Day {
@@ -28,7 +28,7 @@ impl Day {
             4 => Some(Day::Wednesday),
             5 => Some(Day::Thursday),
             6 => Some(Day::Friday),
-            _ => None
+            _ => None,
         }
     }
     pub fn from_str(s: &str) -> Option<Day> {
@@ -40,7 +40,7 @@ impl Day {
             "Wednesday" => Some(Day::Wednesday),
             "Thursday" => Some(Day::Thursday),
             "Friday" => Some(Day::Friday),
-            _ => None
+            _ => None,
         }
     }
     pub fn to_index(&self) -> usize {
@@ -144,7 +144,15 @@ impl Event {
 
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{: >9} {: <6} - {: <6} | {} ({:?})", self.day.to_string(), self.start.to_string(), self.end.to_string(), self.name, self.kind)
+        write!(
+            f,
+            "{: >9} {: <6} - {: <6} | {} ({:?})",
+            self.day.to_string(),
+            self.start.to_string(),
+            self.end.to_string(),
+            self.name,
+            self.kind
+        )
     }
 }
 
@@ -182,7 +190,11 @@ impl Shift {
 
 impl fmt::Display for Shift {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} => {} - {}", self.emp_id, self.start.string, self.end.string)
+        write!(
+            f,
+            "{} => {} - {}",
+            self.emp_id, self.start.string, self.end.string
+        )
     }
 }
 
@@ -199,46 +211,46 @@ impl Time {
     // Constructors
     pub fn from_str(st: &str) -> Time {
         //! Construct a Time from a &str of the format `"HH:MM"` or `"H:MM"`, using 24-hour notation.
-        //! 
+        //!
         //! # Examples
         //! ```
         //! use sched_lib::time::Time as Time;
         //! let t = Time::from_str("10:30");
         //! assert_eq!(t.get_qi(), 42);
-        //! 
+        //!
         //! let u = Time::from_str("22:45");
         //! assert_eq!(u.get_qi(), 91);
         //! ```
         let qi = Time::string_to_qi(st);
         let string = Time::qi_to_string(qi);
-        if qi >= 4*24 {
+        if qi >= 4 * 24 {
             panic!("Bad time!")
         }
         Time { string, qi }
     }
     pub fn from_qi(qi: usize) -> Time {
         //! Construct a Time from a QuarterIndex (the 0-indexed position of its 15-minute chunk in the day).
-        //! 
+        //!
         //! # Examples
         //! ```
         //! use sched_lib::time::Time as Time;
         //! let t = Time::from_qi(0);
         //! assert_eq!(t.to_string_24h(), "0:00");
-        //! 
+        //!
         //! let u = Time::from_qi(49);
         //! assert_eq!(u.to_string_24h(), "12:15"); // 12:15
         //! ```
-        if qi >= 4*24 {
+        if qi >= 4 * 24 {
             panic!("Bad time!")
         }
         Time {
             string: Time::qi_to_string(qi),
-            qi
+            qi,
         }
     }
     pub fn from_hour(hour: usize) -> Time {
         //! Construct a Time from a simple hour number out of 24. Implemented as from_qi(hour * 4).
-        //! 
+        //!
         //! # Examples
         //! ```
         //! use sched_lib::time::Time as Time;
@@ -251,7 +263,7 @@ impl Time {
     // Access
     pub fn to_string_24h(&self) -> String {
         //! Return a 24-hour (military) string of this time.
-        //! 
+        //!
         //! # Examples
         //! ```
         //! use sched_lib::time::Time as Time;
@@ -262,7 +274,7 @@ impl Time {
     }
     pub fn to_string(&self) -> String {
         //! Return a 12-hour (US) string of this time.
-        //! 
+        //!
         //! # Examples
         //! ```
         //! use sched_lib::time::Time as Time;
@@ -272,16 +284,16 @@ impl Time {
         let qi = self.qi;
         if qi < 4 {
             // 12:MMa
-            format!("12:{:0>2}a", qi*15)
-        } else if qi >= 4 && qi < 12*4 {
+            format!("12:{:0>2}a", qi * 15)
+        } else if qi >= 4 && qi < 12 * 4 {
             // 1:MMa -> 11:MMa
-            format!("{}:{:0>2}a", qi/4, (qi%4)*15)
-        } else if qi >= 12*4 && qi < 13*4 {
+            format!("{}:{:0>2}a", qi / 4, (qi % 4) * 15)
+        } else if qi >= 12 * 4 && qi < 13 * 4 {
             // 12:MMp
-            format!("12:{:0>2}p", (qi%4)*15)
+            format!("12:{:0>2}p", (qi % 4) * 15)
         } else {
             // 1:MMp -> 11:MMp
-            format!("{}:{:0>2}p", (qi/4)-12, (qi%4)*15)
+            format!("{}:{:0>2}p", (qi / 4) - 12, (qi % 4) * 15)
         }
     }
     pub fn get_qi(&self) -> usize {
@@ -296,39 +308,38 @@ impl Time {
         let v: Vec<&str> = s.split(":").collect();
         let hours: usize = v[0].parse().unwrap();
         let minutes: usize = v[1].parse().unwrap();
-        ((hours*60) + minutes) / 15
+        ((hours * 60) + minutes) / 15
     }
     fn qi_to_string(qi: usize) -> String {
         let hours = qi / 4;
         let minutes = qi % 4;
-        format!("{}:{:0>2}", hours, minutes*15)
+        format!("{}:{:0>2}", hours, minutes * 15)
     }
 }
 
 impl fmt::Display for Time {
-        //! Display a 12-hour (US) string of this time.
-        //! 
-        //! # Examples
-        //! ```
-        //! use sched_lib::time::Time as Time;
-        //! println!("{}", Time::from_hour(23).to_string()); // "11:00p"
-        //! println!("{}", Time::from_hour(9).to_string()); // "9:00a"
-        //! ```
+    //! Display a 12-hour (US) string of this time.
+    //!
+    //! # Examples
+    //! ```
+    //! use sched_lib::time::Time as Time;
+    //! println!("{}", Time::from_hour(23).to_string()); // "11:00p"
+    //! println!("{}", Time::from_hour(9).to_string()); // "9:00a"
+    //! ```
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-
         let qi = self.qi;
         if qi < 4 {
             // 12:MMa
-            write!(f, "12:{:0>2}a", qi*15)
-        } else if qi >= 4 && qi < 12*4 {
+            write!(f, "12:{:0>2}a", qi * 15)
+        } else if qi >= 4 && qi < 12 * 4 {
             // 1:MMa -> 11:MMa
-            write!(f, "{}:{:0>2}a", qi/4, (qi%4)*15)
-        } else if qi >= 12*4 && qi < 13*4 {
+            write!(f, "{}:{:0>2}a", qi / 4, (qi % 4) * 15)
+        } else if qi >= 12 * 4 && qi < 13 * 4 {
             // 12:MMp
-            write!(f, "12:{:0>2}p", (qi%4)*15)
+            write!(f, "12:{:0>2}p", (qi % 4) * 15)
         } else {
             // 1:MMp -> 11:MMp
-            write!(f, "{}:{:0>2}p", (qi/4)-12, (qi%4)*15)
+            write!(f, "{}:{:0>2}p", (qi / 4) - 12, (qi % 4) * 15)
         }
     }
 }
@@ -345,7 +356,7 @@ impl PartialEq for Time {
 pub struct Schedule {
     pub events: Vec<Event>,
     raw_reqs: [[i32; 24 * 4]; 7],
-    shifts: [Vec<Shift>; 7]
+    shifts: [Vec<Shift>; 7],
 }
 
 impl fmt::Debug for Schedule {
@@ -355,7 +366,9 @@ impl fmt::Debug for Schedule {
             rr.push_str("[");
             for (i, cover) in day_arr.iter().enumerate() {
                 rr.push_str(&format!("{}", cover));
-                if i != day_arr.len()-1 { rr.push_str(", ") }
+                if i != day_arr.len() - 1 {
+                    rr.push_str(", ")
+                }
             }
             rr.push_str("]\n");
         }
@@ -376,7 +389,9 @@ impl fmt::Display for Schedule {
             for shift in day.iter() {
                 out.push_str(&format!("\n{}", shift));
             }
-            if i != 6 { out.push_str("\n") }
+            if i != 6 {
+                out.push_str("\n")
+            }
         }
         write!(f, "{}", out)
     }
@@ -388,8 +403,16 @@ impl Schedule {
         //! Create a new, empty schedule.
         Schedule {
             events: Vec::new(),
-            raw_reqs: [[0; 24*4]; 7],
-            shifts: [Vec::new(), Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new(),Vec::new()],
+            raw_reqs: [[0; 24 * 4]; 7],
+            shifts: [
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            ],
         }
     }
     // Display/Access
@@ -398,7 +421,7 @@ impl Schedule {
         for (i, day) in self.raw_reqs.iter().enumerate() {
             let day_name = match Day::from_index(i) {
                 Some(d) => d.to_string(),
-                None => panic!("Bad day above!")
+                None => panic!("Bad day above!"),
             };
             println!("\n{}", day_name);
             for (j, quarter_req) in day.iter().enumerate() {
@@ -418,19 +441,26 @@ impl Schedule {
         &self.events
     }
     // Modification
-    pub fn add_event(&mut self, name: &str, kind: &str, day: Day, start: Time, end: Time) -> &mut Event {
+    pub fn add_event(
+        &mut self,
+        name: &str,
+        kind: &str,
+        day: Day,
+        start: Time,
+        end: Time,
+    ) -> &mut Event {
         //! Add an event (class, tournament, etc.) to this schedule.
         let ev = Event::new(name.to_string(), day, start, end, kind.to_string());
         self.events.push(ev);
         let li = self.events.len() - 1;
         &mut self.events[li]
     }
-    pub fn assign_shift(&mut self, emp_id: String,  day: Day, start: Time, end: Time) {
+    pub fn assign_shift(&mut self, emp_id: String, day: Day, start: Time, end: Time) {
         //! Assign a new shift to the employee with id emp_id.
         let sh = Shift { emp_id, start, end };
         self.shifts[day.to_index()].push(sh);
     }
-    pub fn assign_event(&mut self, emp_id: String,  event: Event) {
+    pub fn assign_event(&mut self, emp_id: String, event: Event) {
         //! Assign an event to the employee with id emp_id.
         // Move start time back by the setup amount
         let start = event.start.get_qi() - event.setup.get_qi();
@@ -438,7 +468,7 @@ impl Schedule {
         // Move end time forward by the breakdown amount
         let end = event.end.get_qi() + event.breakdown.get_qi();
         let end = Time::from_qi(end);
-        
+
         let sh = Shift { emp_id, start, end };
         self.shifts[event.day.to_index()].push(sh);
     }
@@ -446,13 +476,13 @@ impl Schedule {
         //! Set the store's open and close hours for a given day.
         let start = Time::from_hour(start).qi;
         let end = Time::from_hour(end).qi;
-        for qi in start-1..start {
+        for qi in start - 1..start {
             self.raw_reqs[day.to_index()][qi] = 3;
         }
         for qi in start..=end {
             self.raw_reqs[day.to_index()][qi] = 4;
         }
-        for qi in end+1..=end+3 {
+        for qi in end + 1..=end + 3 {
             self.raw_reqs[day.to_index()][qi] = 3;
         }
     }
@@ -522,7 +552,12 @@ impl Schedule {
             for j in 0..len {
                 if coverage[j] < self.raw_reqs[i][j] {
                     adequate = false;
-                    println!("Low coverage at {} on {}: {}", Time::from_qi(j), Day::from_index(i).unwrap(), coverage[j]);
+                    println!(
+                        "Low coverage at {} on {}: {}",
+                        Time::from_qi(j),
+                        Day::from_index(i).unwrap(),
+                        coverage[j]
+                    );
                 }
             }
         }
@@ -550,21 +585,33 @@ impl Schedule {
     pub fn expand_shifts(&mut self, emp_id: String) {
         for i in 0..7 {
             for shift in &mut self.shifts[i] {
-                if shift.emp_id != emp_id { continue }
-                let direc: bool = rand::random();
-                while shift.len() < 8*4
-                    && self.raw_reqs[i][shift.end.get_qi()+1] != 0
-                    && self.raw_reqs[i][shift.start.get_qi()-1] != 0 {
-                        println!("Extending {}", (if direc {"forward"} else {"backward"}));
-                        shift.extend(direc);
+                if shift.emp_id != emp_id {
+                    continue;
                 }
-                while shift.len() < 8*4
-                    && self.raw_reqs[i][shift.end.get_qi()+1] != 0
-                    && self.raw_reqs[i][shift.start.get_qi()-1] != 0 {
-                        println!("Extending {}", (if !direc {"forward"} else {"backward"}));
+                let direc: bool = rand::random();
+                while shift.len() < 8 * 4
+                    && self.raw_reqs[i][shift.end.get_qi() + 1] != 0
+                    && self.raw_reqs[i][shift.start.get_qi() - 1] != 0
+                {
+                    println!("Extending {}", (if direc { "forward" } else { "backward" }));
+                    shift.extend(direc);
+                }
+                while shift.len() < 8 * 4
+                    && self.raw_reqs[i][shift.end.get_qi() + 1] != 0
+                    && self.raw_reqs[i][shift.start.get_qi() - 1] != 0
+                {
+                    println!(
+                        "Extending {}",
+                        (if !direc { "forward" } else { "backward" })
+                    );
                     shift.extend(!direc);
                 }
-                println!("New shift: {} {} -> {}", Day::from_index(i).unwrap(), shift.start.to_string(), shift.end.to_string());
+                println!(
+                    "New shift: {} {} -> {}",
+                    Day::from_index(i).unwrap(),
+                    shift.start.to_string(),
+                    shift.end.to_string()
+                );
             }
         }
     }

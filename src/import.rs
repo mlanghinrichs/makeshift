@@ -1,7 +1,7 @@
 //! File importing and parsing.
+use super::emp::{Employee, Roster};
+use super::time::{Day, Event, Time};
 use csv;
-use super::emp::{ Employee, Roster };
-use super::time::{ Day, Event, Time };
 use std::error::Error;
 use std::fs;
 
@@ -85,6 +85,16 @@ fn build_event(sr: &csv::StringRecord) -> Result<Event, Box<Error>> {
             req_emp_ids.push(empl.to_owned());
         }
     }
-    let out = Event { name, req_emp_ids, day, start, end, num_emps, kind, setup, breakdown };
+    let out = Event {
+        name,
+        req_emp_ids,
+        day,
+        start,
+        end,
+        num_emps,
+        kind,
+        setup,
+        breakdown,
+    };
     Ok(out)
 }
