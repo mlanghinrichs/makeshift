@@ -52,7 +52,7 @@ All further columns after role are treated as a relative evaluation of the emplo
 
 # Contributing
 
-This project follows the [AngularJS Git Commit Message Conventions](https://gist.github.com/stephenparish/9941e89d80e2bc58a153#format-of-the-commit-message) and the [Rust Code of Conduct](https://www.rust-lang.org/policies/code-of-conduct). More thorough contribution guidelines will be posted following the first project release.
+This project follows the [AngularJS Git Commit Message Conventions](https://gist.github.com/stephenparish/9941e89d80e2bc58a153#format-of-the-commit-message) and the [Contributor Covenant Code of Conduct](./CODE_OF_CONDUCT.md). We also respect and abide by the [Rust Code of Conduct](https://www.rust-lang.org/policies/code-of-conduct). More thorough contribution guidelines will be posted following the first project release.
 
 MakeShift is licensed under the Gnu Public License (GPL) version 3.0. For more information see [LICENSE](./LICENSE.txt) or the [Gnu Website](https://www.gnu.org/licenses/).
 
