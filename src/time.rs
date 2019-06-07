@@ -215,7 +215,7 @@ impl Time {
         //!
         //! # Examples
         //! ```
-        //! use sched_lib::time::Time as Time;
+        //! use makeshift::time::Time as Time;
         //! let t = Time::from_str("10:30");
         //! assert_eq!(t.get_qi(), 42);
         //!
@@ -234,7 +234,7 @@ impl Time {
         //!
         //! # Examples
         //! ```
-        //! use sched_lib::time::Time as Time;
+        //! use makeshift::time::Time as Time;
         //! let t = Time::from_qi(0);
         //! assert_eq!(t.to_string_24h(), "0:00");
         //!
@@ -254,7 +254,7 @@ impl Time {
         //!
         //! # Examples
         //! ```
-        //! use sched_lib::time::Time as Time;
+        //! use makeshift::time::Time as Time;
         //! let t = Time::from_hour(14);
         //! assert_eq!(t.get_qi(), 56);
         //! assert_eq!(t.to_string_24h(), "14:00");
@@ -267,7 +267,7 @@ impl Time {
         //!
         //! # Examples
         //! ```
-        //! use sched_lib::time::Time as Time;
+        //! use makeshift::time::Time as Time;
         //! println!("{}", Time::from_hour(13).to_string_24h()); // "13:00"
         //! println!("{}", Time::from_hour(2).to_string_24h()); // "2:00"
         //! ```
@@ -278,7 +278,7 @@ impl Time {
         //!
         //! # Examples
         //! ```
-        //! use sched_lib::time::Time as Time;
+        //! use makeshift::time::Time as Time;
         //! println!("{}", Time::from_hour(23).to_string()); // "11:00p"
         //! println!("{}", Time::from_hour(9).to_string()); // "9:00a"
         //! ```
@@ -323,7 +323,7 @@ impl fmt::Display for Time {
     //!
     //! # Examples
     //! ```
-    //! use sched_lib::time::Time as Time;
+    //! use makeshift::time::Time as Time;
     //! println!("{}", Time::from_hour(23).to_string()); // "11:00p"
     //! println!("{}", Time::from_hour(9).to_string()); // "9:00a"
     //! ```
@@ -711,7 +711,7 @@ mod tests {
     }
     #[test]
     fn has_reqs() {
-        let ev = setup();
+        let ev = ev_setup();
         assert!(ev.has_reqs())
     }
 }
