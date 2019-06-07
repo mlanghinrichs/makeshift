@@ -1,4 +1,4 @@
-![](./img/logo.png)
+<img style="margin: auto; display: block;" src="./img/logo.png">
 
 # Overview
 

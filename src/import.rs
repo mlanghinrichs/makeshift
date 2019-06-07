@@ -6,7 +6,7 @@ use std::error::Error;
 use std::fs;
 
 pub fn get_roster() -> Result<Roster, Box<Error>> {
-    let file = fs::File::open("../sched_lib/docs/roster.csv")?;
+    let file = fs::File::open("./docs/roster.csv")?;
     let mut rdr = csv::Reader::from_reader(file);
     let mut ros = Roster::new();
     let mut headers = Vec::new();
@@ -28,7 +28,7 @@ pub fn get_roster() -> Result<Roster, Box<Error>> {
 }
 
 pub fn get_events() -> Result<Vec<Event>, Box<Error>> {
-    let file = fs::File::open("../sched_lib/docs/events.csv")?;
+    let file = fs::File::open("./docs/events.csv")?;
     let mut rdr = csv::Reader::from_reader(file);
     let mut out = Vec::new();
     for result in rdr.records() {

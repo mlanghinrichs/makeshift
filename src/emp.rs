@@ -141,7 +141,7 @@ impl Employee {
         }
     }
     pub fn is_able(&self, k: &str) -> bool {
-        if let Some(u) = self.abils.get(k) {
+        if let Some(_) = self.abils.get(k) {
             true
         } else {
             false
@@ -152,7 +152,7 @@ impl Employee {
         self.roles.push(s.to_owned());
     }
     pub fn remove_role(&mut self, s: &str) {
-        for (i, role) in self.roles.iter().enumerate() {
+        for (_i, role) in self.roles.iter().enumerate() {
             if role == s {
                 // self.roles.remove(i);
                 println!(

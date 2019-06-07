@@ -1,12 +1,10 @@
 use makeshift::{
-    self,
-    emp::{Employee, Roster},
-    import,
-    time::{Day, Schedule, Time},
+    self, import,
+    time::{Day, Schedule},
 };
 
 fn main() {
-    let mut ros = import::get_roster().unwrap();
+    let ros = import::get_roster().unwrap();
     let mut sched = get_schedule();
     let evs = import::get_events().unwrap();
     sched.events.extend(evs);
