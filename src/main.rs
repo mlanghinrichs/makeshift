@@ -1,17 +1,9 @@
 use sched_lib::{
     self,
-    time::{
-        Day,
-        Schedule,
-        Time,
-        },
-    emp::{
-        Employee,
-        Roster
-        },
-    import
-    };
-
+    emp::{Employee, Roster},
+    import,
+    time::{Day, Schedule, Time},
+};
 
 fn main() {
     let mut ros = import::get_roster().unwrap();

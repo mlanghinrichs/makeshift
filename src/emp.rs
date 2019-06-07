@@ -1,7 +1,7 @@
 //! The emp module contains tools and structures for managing employees and the full store roster thereof.
+use super::time;
 use std::collections::HashMap;
 use std::fmt;
-use super::time;
 
 //==============================================
 
@@ -80,7 +80,6 @@ impl Hours {
 
 //==============================================
 
-
 #[derive(Clone, Debug)]
 /// An employee of the business, identified by the String `self.id`.
 pub struct Employee {
@@ -156,7 +155,11 @@ impl Employee {
         for (i, role) in self.roles.iter().enumerate() {
             if role == s {
                 // self.roles.remove(i);
-                println!("Did not remove role {} from {} because of a quickfix in emp.rs", role, self.id());
+                println!(
+                    "Did not remove role {} from {} because of a quickfix in emp.rs",
+                    role,
+                    self.id()
+                );
             }
         }
     }
@@ -183,7 +186,8 @@ impl fmt::Display for Employee {
         }
         out.push_str(&format!(
             "\nHours range: {} - {}",
-            self.get_hours().min(), self.get_hours().max()
+            self.get_hours().min(),
+            self.get_hours().max()
         ));
         write!(f, "{}", out)
     }
