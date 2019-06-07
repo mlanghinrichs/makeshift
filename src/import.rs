@@ -49,13 +49,13 @@ fn build_empl(sr: &csv::StringRecord, headers: &Vec<String>) -> Result<Employee,
     // cant_work_days
     for word in sr[1].split(", ") {
         if let Some(d) = Day::from_str(word) {
-            empl.cant_work(d.to_index());
+            empl.set_available(d, false);
         }
     }
     // min_ and max_hours
     let min: usize = sr[2].parse()?;
     let max: usize = sr[3].parse()?;
-    empl.change_hours(min, max)?;
+    empl.hours().set(min, max);
 
     for role in sr[4].split(", ") {
         empl.add_role(role);

@@ -1,6 +1,7 @@
 //! The emp module contains tools and structures for managing employees and the full store roster thereof.
 use std::collections::HashMap;
 use std::fmt;
+use super::time;
 
 //==============================================
 
@@ -20,7 +21,7 @@ impl Roster {
     }
     pub fn add(&mut self, emp: Employee) {
         //! Add an employee to the roster.
-        self.emps.insert(emp.get_id(), emp);
+        self.emps.insert(emp.id(), emp);
     }
     pub fn get(&self, id: String) -> &Employee {
         //! Get an employee reference from the roster by String ID.
@@ -53,87 +54,136 @@ impl fmt::Display for Roster {
 //==============================================
 
 #[derive(Clone, Debug)]
+pub struct Hours(usize, usize);
+
+impl Hours {
+    pub fn set_min(&mut self, m: usize) -> &mut Hours {
+        self.0 = m;
+        self
+    }
+    pub fn set_max(&mut self, m: usize) -> &mut Hours {
+        self.1 = m;
+        self
+    }
+    pub fn set(&mut self, min: usize, max: usize) -> &mut Hours {
+        self.0 = min;
+        self.1 = max;
+        self
+    }
+    pub fn min(&self) -> usize {
+        self.0
+    }
+    pub fn max(&self) -> usize {
+        self.1
+    }
+}
+
+//==============================================
+
+
+#[derive(Clone, Debug)]
 /// An employee of the business, identified by the String `self.id`.
 pub struct Employee {
-    pub id: String,
-    can_work_days: [bool; 7],
-    minimum_hours: usize,
-    maximum_hours: usize,
+    pub iden: String,
+    avail: [bool; 7],
+    hrs: Hours,
     abils: HashMap<String, u8>,
     roles: Vec<String>,
 }
 
 impl Employee {
-    pub fn new(id: String) -> Employee {
+    // Construction
+    pub fn new(iden: String) -> Employee {
         //! Create a new Employee.
         Employee {
-            id,
-            can_work_days: [true; 7],
-            minimum_hours: 37,
-            maximum_hours: 39,
+            iden,
+            avail: [true; 7],
+            hrs: Hours(38, 40),
             abils: HashMap::new(),
             roles: Vec::new(),
         }
     }
-    pub fn get_id(&self) -> String {
+    // self.iden
+    pub fn id(&self) -> String {
         //! Return an Employee's identifier.
-        self.id.clone()
+        self.iden.clone()
     }
+    // self.avail
+    pub fn set_available(&mut self, day: time::Day, b: bool) -> bool {
+        //! Set an employee's availability for a day. Returns the previous availability for that day.
+        let d_i = day.to_index();
+        let out = self.avail[d_i];
+        self.avail[d_i] = b;
+        out
+    }
+    pub fn is_available(&self, day: time::Day) -> bool {
+        //! Check an if this employee can work a day.
+        self.avail[day.to_index()]
+    }
+    // self.hrs
+    pub fn get_hours(&self) -> &Hours {
+        &self.hrs
+    }
+    pub fn hours(&mut self) -> &mut Hours {
+        &mut self.hrs
+    }
+    // self.abils
     pub fn set_abil(&mut self, k: &str, v: u8) {
         let key = k.clone();
         if let Some(val) = self.abils.insert(k.to_owned(), v) {
-            println!("Updated {} to {} in {}", key, val, self.id);
+            println!("Updated {} to {} in {}", key, val, self.id());
         };
     }
+    pub fn get_abil(&self, k: &str) -> Option<u8> {
+        if let Some(u) = self.abils.get(k) {
+            Some(*u)
+        } else {
+            None
+        }
+    }
+    pub fn is_able(&self, k: &str) -> bool {
+        if let Some(u) = self.abils.get(k) {
+            true
+        } else {
+            false
+        }
+    }
+    // self.roles
     pub fn add_role(&mut self, s: &str) {
         self.roles.push(s.to_owned());
     }
-    pub fn is_class_only(&mut self) {
-        self.change_hours(0, 10)
-            .expect("something went wrong in setting hours somehow");
-        self.set_abil("Class", 3);
-    }
-    pub fn change_hours(&mut self, min: usize, max: usize) -> Result<(), &'static str> {
-        //! Change an employee's required hour max/min.
-        if max > min && max <= 40 {
-            self.minimum_hours = min;
-            self.maximum_hours = max;
-            Ok(())
-        } else {
-            // todo expand error messages
-            Err("something went wrong!")
+    pub fn remove_role(&mut self, s: &str) {
+        for (i, role) in self.roles.iter().enumerate() {
+            if role == s {
+                // self.roles.remove(i);
+                println!("Did not remove role {} from {} because of a quickfix in emp.rs", role, self.id());
+            }
         }
     }
-    pub fn cant_work(&mut self, day: usize) -> () {
-        //! Indicate that this employee can't work a given day.
-        if day < 7 {
-            self.can_work_days[day] = false;
-        } else {
-            println!("invalid day # - did not change")
+    pub fn has_role(&self, s: &str) -> bool {
+        for role in self.roles.iter() {
+            if role == s {
+                return true;
+            }
         }
-    }
-    pub fn min_hours(&self) -> usize {
-        self.minimum_hours
-    }
-    pub fn max_hours(&self) -> usize {
-        self.maximum_hours
+        false
     }
 }
 
 impl fmt::Display for Employee {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut out = String::new();
-        out.push_str(&format!("\n=== ID: {} ===", self.get_id()));
+        out.push_str(&format!("\n=== ID: {} ===", self.id()));
         let weekdays = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
         out.push_str("\nCan work: \n");
         for (n, name) in weekdays.iter().enumerate() {
-            if self.can_work_days[n] {
+            if self.avail[n] {
                 out.push_str(&format!("{} ", name));
             }
         }
         out.push_str(&format!(
             "\nHours range: {} - {}",
-            self.minimum_hours, self.maximum_hours
+            self.get_hours().min(), self.get_hours().max()
         ));
         write!(f, "{}", out)
     }

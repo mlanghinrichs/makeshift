@@ -511,8 +511,8 @@ impl Schedule {
             }
         }
         let em = ros.get(id.to_string());
-        let min = em.min_hours() * 4;
-        let max = em.max_hours() * 4;
+        let min = em.get_hours().min() * 4;
+        let max = em.get_hours().max() * 4;
         if min <= total && total <= max {
             true
         } else {
