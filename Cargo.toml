@@ -1,5 +1,5 @@
 [package]
-name = "sched_lib"
+name = "makeshift"
 version = "0.1.0"
 authors = ["Matt Langhinrichs <mlanghinrichs@gmail.com>"]
 edition = "2018"

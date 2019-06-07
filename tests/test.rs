@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[allow(unused_imports)]
 mod test_time {
-    use sched_lib::time::Time;
+    use makeshift::time::Time;
     #[test]
     fn midnight() {
         let t = Time::from_str("0:15");
@@ -77,7 +77,7 @@ mod test_time {
 
 #[cfg(test)]
 mod test_time_event {
-    use sched_lib::time::{Day, Event, Time};
+    use makeshift::time::{Day, Event, Time};
     fn setup() -> Event {
         let mut ev = Event::new(
             "Name".to_string(),
